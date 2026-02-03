@@ -43,7 +43,7 @@ const config = {
             "value": "prisma-client"
         },
         "output": {
-            "value": "C:\\Users\\Diák\\Desktop\\aaaaaaaa\\projectnev\\backend\\generated\\prisma",
+            "value": "C:\\Users\\Diák\\Downloads\\project\\backend\\generated\\prisma",
             "fromEnvVar": null
         },
         "config": {
@@ -58,7 +58,7 @@ const config = {
             }
         ],
         "previewFeatures": [],
-        "sourceFilePath": "C:\\Users\\Diák\\Desktop\\aaaaaaaa\\projectnev\\backend\\prisma\\schema.prisma",
+        "sourceFilePath": "C:\\Users\\Diák\\Downloads\\project\\backend\\prisma\\schema.prisma",
         "isCustomOutput": true
     },
     "relativePath": "../../prisma",

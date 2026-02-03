@@ -12,7 +12,10 @@ if (storedToken) {
 
 async function request<T>(path: string, init?: RequestInit) {
   const headers: Record<string, string> = {};
-  headers['Content-Type'] = 'application/json';
+  const isFormData = init?.body instanceof FormData;
+  if (!isFormData) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   if (authToken) {
     headers['Authorization'] = `Bearer ${authToken}`;
@@ -106,6 +109,12 @@ export const api = {
   createProduct: async (data: { name: string; description?: string; category: string; price: number; stock: number }) => {
     const created = await request<any>('/products', { method: 'POST', body: JSON.stringify(data) });
     return created;
+  },
+  uploadProductImage: async (id: number, file: File) => {
+    const body = new FormData();
+    body.append('file', file);
+    const updated = await request<any>(`/products/${id}/image`, { method: 'POST', body });
+    return updated;
   },
   deleteProduct: async (id: number) => {
     const res = await request<void>(`/products/${id}`, { method: 'DELETE' });

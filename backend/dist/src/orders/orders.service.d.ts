@@ -8,46 +8,46 @@ export declare class OrdersService {
         orderItems: {
             id: number;
             price: number;
-            orderId: number;
-            productId: number;
             quantity: number;
+            productId: number;
+            orderId: number;
         }[];
     } & {
         id: number;
-        userId: number;
         totalPrice: number;
         createdAt: Date;
         status: boolean;
+        userId: number;
     }>;
     findAll(): import("../../generated/prisma/internal/prismaNamespace").PrismaPromise<({
         orderItems: {
             id: number;
             price: number;
-            orderId: number;
-            productId: number;
             quantity: number;
+            productId: number;
+            orderId: number;
         }[];
     } & {
         id: number;
-        userId: number;
         totalPrice: number;
         createdAt: Date;
         status: boolean;
+        userId: number;
     })[]>;
     findOne(id: number): import("../../generated/prisma/models").Prisma__OrdersClient<({
         orderItems: {
             id: number;
             price: number;
-            orderId: number;
-            productId: number;
             quantity: number;
+            productId: number;
+            orderId: number;
         }[];
     } & {
         id: number;
-        userId: number;
         totalPrice: number;
         createdAt: Date;
         status: boolean;
+        userId: number;
     }) | null, null, import("@prisma/client/runtime/library").DefaultArgs, {
         omit: import("../../generated/prisma/internal/prismaNamespace").GlobalOmitConfig | undefined;
     }>;
@@ -55,25 +55,25 @@ export declare class OrdersService {
         orderItems: {
             id: number;
             price: number;
-            orderId: number;
-            productId: number;
             quantity: number;
+            productId: number;
+            orderId: number;
         }[];
     } & {
         id: number;
-        userId: number;
         totalPrice: number;
         createdAt: Date;
         status: boolean;
+        userId: number;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, {
         omit: import("../../generated/prisma/internal/prismaNamespace").GlobalOmitConfig | undefined;
     }>;
     remove(id: number): import("../../generated/prisma/models").Prisma__OrdersClient<{
         id: number;
-        userId: number;
         totalPrice: number;
         createdAt: Date;
         status: boolean;
+        userId: number;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, {
         omit: import("../../generated/prisma/internal/prismaNamespace").GlobalOmitConfig | undefined;
     }>;

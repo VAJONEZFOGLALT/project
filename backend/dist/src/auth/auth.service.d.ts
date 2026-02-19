@@ -21,11 +21,12 @@ export declare class AuthService {
         token: string;
     }>;
     validateUser(userId: number): Promise<{
-        name: string;
-        id: number;
         username: string;
         email: string;
         password_hash: string;
+        name: string;
+        avatar: string | null;
         role: string;
+        id: number;
     } | null>;
 }

@@ -96,6 +96,12 @@ export const api = {
     const updated = await request<any>(`/users/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
     return updated;
   },
+  uploadUserAvatar: async (id: number, file: File) => {
+    const body = new FormData();
+    body.append('file', file);
+    const updated = await request<any>(`/users/${id}/avatar`, { method: 'POST', body });
+    return updated;
+  },
   deleteUser: async (id: number) => {
     const res = await request<void>(`/users/${id}`, { method: 'DELETE' });
     return res;
@@ -126,7 +132,16 @@ export const api = {
     const data = await request<any[]>('/orders');
     return data;
   },
-  createOrder: async (data: { userId: number; items: { productId: number; quantity: number }[] }) => {
+  getUserOrders: async (userId: number) => {
+    const data = await request<any[]>(`/orders/user/${userId}`);
+    return data;
+  },
+  createOrder: async (data: { 
+    userId: number; 
+    items: { productId: number; quantity: number }[];
+    courier?: string;
+    shippingAddress?: string;
+  }) => {
     const created = await request<any>('/orders', { method: 'POST', body: JSON.stringify(data) });
     return created;
   },
@@ -162,7 +177,7 @@ export const api = {
     const data = await request<{ average: number; count: number }>(`/reviews/product/${productId}/average`);
     return data;
   },
-  createReview: async (data: { userId: number; productId: number; rating: number; comment?: string }) => {
+  createReview: async (data: { userId: number; productId: number; rating: number; title: string; comment: string }) => {
     const created = await request<any>('/reviews', { method: 'POST', body: JSON.stringify(data) });
     return created;
   },
@@ -188,9 +203,73 @@ export const api = {
     const res = await request<void>(`/wishlist/${id}`, { method: 'DELETE' });
     return res;
   },
+  removeFromWishlistByProduct: async (userId: number, productId: number) => {
+    const res = await request<void>(`/wishlist/user/${userId}/product/${productId}`, { method: 'DELETE' });
+    return res;
+  },
   isInWishlist: async (userId: number, productId: number) => {
     const exists = await request<boolean>(`/wishlist/check/${userId}/${productId}`);
     return exists;
+  },
+
+  // Recently Viewed
+  getRecentlyViewed: async (userId: number) => {
+    const data = await request<any[]>(`/recently-viewed/user/${userId}`);
+    return data;
+  },
+  addRecentlyViewed: async (data: { userId: number; productId: number }) => {
+    const created = await request<any>('/recently-viewed', { method: 'POST', body: JSON.stringify(data) });
+    return created;
+  },
+  clearRecentlyViewed: async (userId: number) => {
+    const res = await request<void>(`/recently-viewed/user/${userId}`, { method: 'DELETE' });
+    return res;
+  },
+
+  // Compare
+  getCompare: async (userId: number) => {
+    const data = await request<any[]>(`/compare/user/${userId}`);
+    return data;
+  },
+  addCompare: async (data: { userId: number; productId: number }) => {
+    const created = await request<any>('/compare', { method: 'POST', body: JSON.stringify(data) });
+    return created;
+  },
+  removeCompare: async (userId: number, productId: number) => {
+    const res = await request<void>(`/compare/user/${userId}/product/${productId}`, { method: 'DELETE' });
+    return res;
+  },
+  clearCompare: async (userId: number) => {
+    const res = await request<void>(`/compare/user/${userId}`, { method: 'DELETE' });
+    return res;
+  },
+
+  // Addresses
+  getAddresses: async (userId: number) => {
+    const data = await request<any[]>(`/addresses?userId=${userId}`);
+    return data;
+  },
+  createAddress: async (data: {
+    userId: number;
+    label: string;
+    fullName: string;
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country?: string;
+    isDefault?: boolean;
+  }) => {
+    const created = await request<any>('/addresses', { method: 'POST', body: JSON.stringify(data) });
+    return created;
+  },
+  updateAddress: async (id: number, data: any) => {
+    const updated = await request<any>(`/addresses/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+    return updated;
+  },
+  deleteAddress: async (id: number) => {
+    const res = await request<void>(`/addresses/${id}`, { method: 'DELETE' });
+    return res;
   },
 };
 

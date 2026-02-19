@@ -1,7 +1,29 @@
 import { useCart } from '../contexts/CartContext';
 import { useNavigate } from 'react-router-dom';
 
-export default function ProductCard({ product, disableNav }: { product: any; disableNav?: boolean }) {
+type ProductCardProps = {
+  product: any;
+  disableNav?: boolean;
+  showWishlist?: boolean;
+  isWishlisted?: boolean;
+  onToggleWishlist?: (productId: number) => void;
+  showCompare?: boolean;
+  isCompared?: boolean;
+  onToggleCompare?: (productId: number) => void;
+  showStockBadge?: boolean;
+};
+
+export default function ProductCard({
+  product,
+  disableNav,
+  showWishlist,
+  isWishlisted,
+  onToggleWishlist,
+  showCompare,
+  isCompared,
+  onToggleCompare,
+  showStockBadge,
+}: ProductCardProps) {
   const { add } = useCart();
   const navigate = useNavigate();
 
@@ -20,19 +42,56 @@ export default function ProductCard({ product, disableNav }: { product: any; dis
   };
 
   const cursorStyle = canNavigate ? 'pointer' : 'default';
+  const isOutOfStock = product.stock <= 0;
+  const isLowStock = product.stock > 0 && product.stock <= 5;
+
   return (
     <div className="card product-card" onClick={handleOpen} style={{ cursor: cursorStyle }}>
-      {product.image && <img src={product.image} alt={product.name} className="product-image" />}
+      <div className="product-media">
+        {product.image ? (
+          <img src={product.image} alt={product.name} className="product-image" />
+        ) : (
+          <div className="product-image-placeholder">{product.name}</div>
+        )}
+        {showStockBadge && (
+          <span className={`stock-badge ${isOutOfStock ? 'out' : isLowStock ? 'low' : 'in'}`}>
+            {isOutOfStock ? 'Out of stock' : isLowStock ? `Only ${product.stock} left` : 'In stock'}
+          </span>
+        )}
+        {showWishlist && (
+          <button
+            type="button"
+            className={`wishlist-btn ${isWishlisted ? 'active' : ''}`}
+            onClick={(e) => { e.stopPropagation(); onToggleWishlist?.(product.id); }}
+            title={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+          >
+            ♥
+          </button>
+        )}
+        {showCompare && (
+          <label
+            className={`compare-toggle ${isCompared ? 'active' : ''}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <input
+              type="checkbox"
+              checked={!!isCompared}
+              onChange={() => onToggleCompare?.(product.id)}
+            />
+            Compare
+          </label>
+        )}
+      </div>
       <div className="product-header">
         <h3>{product.name}</h3>
         <span className="product-category">{product.category}</span>
       </div>
       <div className="product-body">
         <div className="price">{Number(product.price).toFixed(2)}</div>
-        {typeof product.stock === 'number' && <div className="stock">In stock: {product.stock}</div>}
+        {typeof product.stock === 'number' && <div className="stock">{isOutOfStock ? 'Out of stock' : `Stock: ${product.stock}`}</div>}
       </div>
       <div className="product-actions">
-        <button onClick={handleAddToCart}>Add to Cart</button>
+        <button onClick={handleAddToCart} disabled={isOutOfStock}>Add to Cart</button>
       </div>
     </div>
   );

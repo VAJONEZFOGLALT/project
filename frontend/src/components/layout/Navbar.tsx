@@ -260,17 +260,19 @@ export default function Navbar({ onOpenAuth, onOpenCart }: { onOpenAuth?: (modal
           {/* User Menu */}
           <div className="navbar-user" ref={userMenuRef}>
             <button
-              className="navbar-user-btn"
+              className={`navbar-user-btn ${user ? 'navbar-user-btn-expanded' : 'navbar-user-btn-compact'}`}
               onClick={handleUserMenuToggle}
             >
               {user ? (
                 <>
-                  👤 {user.username}
+                  <span className="navbar-user-icon">👤</span>
+                  <span className="navbar-user-name" title={user.username}>{user.username}</span>
                   <span className="dropdown-arrow">▼</span>
                 </>
               ) : (
                 <>
-                  👤 Account
+                  <span className="navbar-user-icon">👤</span>
+                  <span className="navbar-user-name">Account</span>
                   <span className="dropdown-arrow">▼</span>
                 </>
               )}

@@ -1,4 +1,5 @@
 import { createContext, useContext, useMemo, useState } from 'react';
+import { useToast } from './ToastContext';
 
 export type CartItem = {
   productId: number;
@@ -20,8 +21,11 @@ const CartContext = createContext<CartContextValue | null>(null);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const { showToast } = useToast();
 
   function add(item: Omit<CartItem, 'quantity'>, quantity = 1) {
+    let isNewItem = true;
+    
     setItems(prev => {
       let foundIndex = -1;
       for (let i = 0; i < prev.length; i += 1) {
@@ -32,6 +36,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (foundIndex !== -1) {
+        isNewItem = false;
         const next = prev.slice();
         const existing = next[foundIndex];
         next[foundIndex] = { ...existing, quantity: existing.quantity + quantity };
@@ -41,6 +46,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const nextItem: CartItem = { ...item, quantity };
       return prev.concat(nextItem);
     });
+
+    // Show toast notification
+    if (isNewItem) {
+      showToast(`🛒 "${item.name}" added to cart!`, 'success');
+    } else {
+      showToast(`🛒 Updated "${item.name}" quantity in cart!`, 'success');
+    }
   }
 
   function update(productId: number, quantity: number) {
@@ -57,20 +69,29 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }
 
   function remove(productId: number) {
+    let removedName = '';
+    
     setItems(prev => {
       const next: CartItem[] = [];
       for (let i = 0; i < prev.length; i += 1) {
         const item = prev[i];
         if (item.productId !== productId) {
           next.push(item);
+        } else {
+          removedName = item.name;
         }
       }
       return next;
     });
+
+    if (removedName) {
+      showToast(`🗑️ "${removedName}" removed from cart`, 'info');
+    }
   }
 
   function clear() {
     setItems([]);
+    showToast('🛒 Cart cleared', 'info');
   }
 
   const total = useMemo(() => {

@@ -9,6 +9,7 @@ import OrderItemsView from './adminpages/OrderItemsView'
 // User shop
 import { CartProvider } from './contexts/CartContext'
 import { AuthProvider } from './contexts/AuthContext'
+import { ToastProvider } from './contexts/ToastContext'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { ProtectedAdminRoute } from './components/auth/ProtectedAdminRoute'
 import { LoginModal } from './components/auth/LoginModal'
@@ -19,12 +20,12 @@ import HomePage from './pages/HomePage'
 import AllProductsPage from './pages/AllProductsPage'
 import ProductDetailPage from './pages/ProductDetailPage'
 import CategoryPage from './pages/CategoryPage'
-import CartPage from './pages/CartPage'
 import CheckoutPage from './pages/CheckoutPage'
 import OrderConfirmationPage from './pages/OrderConfirmationPage'
 import NotFoundPage from './pages/NotFoundPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { OrdersPage } from './pages/OrdersPage'
+import { Toast } from './components/Toast';
 
 type TabKey = 'users' | 'products' | 'orders' | 'orderItems'
 type Mode = 'admin' | 'shop'
@@ -103,6 +104,10 @@ function ShopApp({ onOpenAuth }: { onOpenAuth: (modal: AuthModal) => void }) {
     setLastOrderId(id)
   }
 
+  const handleOrderViewed = () => {
+    setLastOrderId(undefined)
+  }
+
   return (
     <CartProvider>
       <Layout onOpenAuth={onOpenAuth} onOpenCart={handleOpenCart}>
@@ -111,9 +116,8 @@ function ShopApp({ onOpenAuth }: { onOpenAuth: (modal: AuthModal) => void }) {
           <Route path="/all" element={<AllProductsPage />} />
           <Route path="/product/:id" element={<ProductDetailPage />} />
           <Route path="/category/:name" element={<CategoryPage />} />
-          <Route path="/cart" element={<CartPage goCheckout={() => {}} />} />
           <Route path="/checkout" element={<ProtectedRoute><CheckoutPage onSuccess={handleOrderSuccess} /></ProtectedRoute>} />
-          <Route path="/confirmation" element={<ProtectedRoute><OrderConfirmationPage orderId={lastOrderId} /></ProtectedRoute>} />
+          <Route path="/confirmation" element={<ProtectedRoute><OrderConfirmationPage orderId={lastOrderId} onOrderViewed={handleOrderViewed} /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
           <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
           <Route path="*" element={<NotFoundPage />} />
@@ -144,26 +148,29 @@ function App() {
   
   return (
     <AuthProvider>
-      <Router>
-        <div className="app-root">
-          <Routes>
-            <Route path="/shop/*" element={<ShopApp onOpenAuth={handleOpenAuth} />} />
-            <Route path="/admin/*" element={<ProtectedAdminRoute><AdminApp /></ProtectedAdminRoute>} />
-            <Route path="/" element={<ShopApp onOpenAuth={handleOpenAuth} />} />
-          </Routes>
+      <ToastProvider>
+        <Router>
+          <div className="app-root">
+            <Routes>
+              <Route path="/shop/*" element={<ShopApp onOpenAuth={handleOpenAuth} />} />
+              <Route path="/admin/*" element={<ProtectedAdminRoute><AdminApp /></ProtectedAdminRoute>} />
+              <Route path="*" element={<ShopApp onOpenAuth={handleOpenAuth} />} />
+            </Routes>
 
-          <LoginModal 
-            isOpen={isLoginOpen} 
-            onClose={handleCloseAuth}
-            onSwitchToRegister={() => handleSwitchModal('register')}
-          />
-          <RegisterModal 
-            isOpen={isRegisterOpen} 
-            onClose={handleCloseAuth}
-            onSwitchToLogin={() => handleSwitchModal('login')}
-          />
-        </div>
-      </Router>
+            <LoginModal 
+              isOpen={isLoginOpen} 
+              onClose={handleCloseAuth}
+              onSwitchToRegister={() => handleSwitchModal('register')}
+            />
+            <RegisterModal 
+              isOpen={isRegisterOpen} 
+              onClose={handleCloseAuth}
+              onSwitchToLogin={() => handleSwitchModal('login')}
+            />
+            <Toast />
+          </div>
+        </Router>
+      </ToastProvider>
     </AuthProvider>
   )
 }

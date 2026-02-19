@@ -19,6 +19,9 @@ const auth_module_1 = require("./auth/auth.module");
 const prisma_service_1 = require("./prisma.service");
 const reviews_module_1 = require("./reviews/reviews.module");
 const wishlist_module_1 = require("./wishlist/wishlist.module");
+const recently_viewed_module_1 = require("./recently-viewed/recently-viewed.module");
+const compare_module_1 = require("./compare/compare.module");
+const addresses_module_1 = require("./addresses/addresses.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -26,7 +29,7 @@ exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [config_1.ConfigModule.forRoot({
                 isGlobal: true,
-            }), auth_module_1.AuthModule, users_module_1.UsersModule, products_module_1.ProductsModule, orders_module_1.OrdersModule, order_items_module_1.OrderItemsModule, reviews_module_1.ReviewsModule, wishlist_module_1.WishlistModule],
+            }), auth_module_1.AuthModule, users_module_1.UsersModule, products_module_1.ProductsModule, orders_module_1.OrdersModule, order_items_module_1.OrderItemsModule, reviews_module_1.ReviewsModule, wishlist_module_1.WishlistModule, recently_viewed_module_1.RecentlyViewedModule, compare_module_1.CompareModule, addresses_module_1.AddressesModule],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService, prisma_service_1.PrismaService],
     })

@@ -3,6 +3,30 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 
+type OrderStatus = 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
+type CourierService = 'UPS' | 'PACKETA' | 'DPD' | 'INPOST';
+
+function getStatusConfig(status: OrderStatus) {
+  const configs = {
+    PENDING: { label: '⏱ Pending', class: 'status-pending', icon: '⏱' },
+    PROCESSING: { label: '⚙️ Processing', class: 'status-processing', icon: '⚙️' },
+    SHIPPED: { label: '🚚 Shipped', class: 'status-shipped', icon: '🚚' },
+    DELIVERED: { label: '✓ Delivered', class: 'status-delivered', icon: '✓' },
+    CANCELLED: { label: '✕ Cancelled', class: 'status-cancelled', icon: '✕' },
+  };
+  return configs[status] || configs.PENDING;
+}
+
+function getCourierIcon(courier: CourierService): { icon: string; name: string } {
+  const couriers: Record<CourierService, { icon: string; name: string }> = {
+    'UPS': { icon: '🚚', name: 'UPS Express' },
+    'PACKETA': { icon: '📦', name: 'Packeta' },
+    'DPD': { icon: '🚛', name: 'DPD' },
+    'INPOST': { icon: '🏤', name: 'InPost' },
+  };
+  return couriers[courier] || { icon: '📦', name: courier };
+}
+
 export function OrdersPage() {
   const { user } = useAuth();
   const [orders, setOrders] = useState<any[]>([]);
@@ -92,12 +116,11 @@ export function OrdersPage() {
                   </div>
                   <div className="order-status">
                     {(() => {
-                      const isDone = !!order.status;
-                      const statusClass = isDone ? 'completed' : 'pending';
-                      const label = isDone ? '✓ Completed' : '⏱ Pending';
+                      const status = (order.status || 'PENDING') as OrderStatus;
+                      const config = getStatusConfig(status);
                       return (
-                        <span className={`status-badge ${statusClass}`}>
-                          {label}
+                        <span className={`status-badge ${config.class}`}>
+                          {config.label}
                         </span>
                       );
                     })()}
@@ -113,6 +136,29 @@ export function OrdersPage() {
                       <span className="info-label">Items</span>
                       <span className="info-value">{items.length} {items.length === 1 ? 'item' : 'items'}</span>
                     </div>
+                    {order.courier && (
+                      <div className="info-row">
+                        <span className="info-label">Courier</span>
+                        <span className="info-value">
+                          <span style={{ marginRight: '8px', fontSize: '1.2em' }}>
+                            {getCourierIcon(order.courier as CourierService).icon}
+                          </span>
+                          {order.courier}
+                        </span>
+                      </div>
+                    )}
+                    {order.trackingNumber && (
+                      <div className="info-row">
+                        <span className="info-label">Tracking</span>
+                        <span className="info-value">{order.trackingNumber}</span>
+                      </div>
+                    )}
+                    {order.shippingAddress && (
+                      <div className="info-row">
+                        <span className="info-label">Shipping To</span>
+                        <span className="info-value">{order.shippingAddress}</span>
+                      </div>
+                    )}
                   </div>
                   <div className="order-total">
                     <span className="total-label">Total</span>

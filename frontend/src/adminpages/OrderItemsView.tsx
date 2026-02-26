@@ -7,6 +7,10 @@ export default function OrderItemsView() {
   const [error, setError] = useState<string | null>(null);
 
   const [form, setForm] = useState({ orderId: 0, productId: 0, quantity: 1, price: 0 });
+  const [query, setQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+  const skeletonRows = Array.from({ length: 5 });
 
   const updateForm = (patch: Partial<typeof form>) => {
     setForm(prev => ({ ...prev, ...patch }));
@@ -25,10 +29,27 @@ export default function OrderItemsView() {
     }
   }
   useEffect(() => { load(); }, []);
+  useEffect(() => { setPage(1); }, [query]);
 
   async function onCreate(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    if (Number(form.orderId) <= 0) {
+      setError('Order ID must be greater than 0');
+      return;
+    }
+    if (Number(form.productId) <= 0) {
+      setError('Product ID must be greater than 0');
+      return;
+    }
+    if (Number(form.quantity) < 1) {
+      setError('Quantity must be at least 1');
+      return;
+    }
+    if (Number(form.price) < 0) {
+      setError('Price must be 0 or more');
+      return;
+    }
     try {
       const payload = {
         orderId: Number(form.orderId),
@@ -56,6 +77,19 @@ export default function OrderItemsView() {
     }
   }
 
+  const trimmed = query.trim().toLowerCase();
+  const filtered = trimmed
+    ? orderItems.filter((oi: any) =>
+        String(oi.id || '').toLowerCase().includes(trimmed) ||
+        String(oi.orderId || '').toLowerCase().includes(trimmed) ||
+        String(oi.productId || '').toLowerCase().includes(trimmed)
+      )
+    : orderItems;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const start = (currentPage - 1) * pageSize;
+  const pagedItems = filtered.slice(start, start + pageSize);
+
   return (
     <div className="view">
       <h2>Order Items</h2>
@@ -82,8 +116,17 @@ export default function OrderItemsView() {
         <button type="submit" disabled={loading}>Create Order Item</button>
       </form>
 
+      <div className="search-bar">
+        <input
+          type="text"
+          placeholder="Search by id, order id, product id"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      </div>
+
       <div className="list">
-        {loading ? <p>Loading…</p> : (
+        {loading ? (
           <table>
             <thead>
               <tr>
@@ -96,7 +139,34 @@ export default function OrderItemsView() {
               </tr>
             </thead>
             <tbody>
-              {orderItems?.map((oi: any) => (
+              {skeletonRows.map((_, idx) => (
+                <tr key={`s-${idx}`}>
+                  <td><div className="skeleton-line" /></td>
+                  <td><div className="skeleton-line" /></td>
+                  <td><div className="skeleton-line" /></td>
+                  <td><div className="skeleton-line" /></td>
+                  <td><div className="skeleton-line" /></td>
+                  <td><div className="skeleton-line" /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : pagedItems.length === 0 ? (
+          <p className="muted">No order items found.</p>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Order ID</th>
+                <th>Product ID</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pagedItems.map((oi: any) => (
                 <tr key={oi.id}>
                   <td>{oi.id}</td>
                   <td>{oi.orderId}</td>
@@ -110,6 +180,18 @@ export default function OrderItemsView() {
           </table>
         )}
       </div>
+
+      {!loading && filtered.length > pageSize && (
+        <div className="pager">
+          <button type="button" disabled={currentPage <= 1} onClick={() => setPage(currentPage - 1)}>
+            Prev
+          </button>
+          <span className="muted">Page {currentPage} of {totalPages}</span>
+          <button type="button" disabled={currentPage >= totalPages} onClick={() => setPage(currentPage + 1)}>
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 }

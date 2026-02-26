@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../../services/api';
+import { useToast } from '../../contexts/ToastContext';
 
 export default function CategoriesBar() {
   const [categories, setCategories] = useState<string[]>([]);
+  const { showToast } = useToast();
   useEffect(() => {
     const loadCategories = async () => {
       try {
@@ -20,7 +22,7 @@ export default function CategoriesBar() {
         list.sort();
         setCategories(list);
       } catch (e) {
-        console.error('Failed to load categories');
+        showToast('Failed to load categories', 'error');
       }
     };
     loadCategories();

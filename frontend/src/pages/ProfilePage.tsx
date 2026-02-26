@@ -4,9 +4,12 @@ import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 import { useWishlist } from '../hooks/useWishlist';
 import { getRecentlyViewed } from '../services/storage';
+import { getAvatarUrl, getProductImageUrl } from '../utils/imageOptimization';
+import { useToast } from '../contexts/ToastContext';
 
-export function ProfilePage() {
-  const { user, updateProfile } = useAuth();
+export default function ProfilePage() {
+  const { user, updateProfile, setUserData } = useAuth();
+  const { showToast } = useToast();
   const navigate = useNavigate();
   const [products, setProducts] = useState<any[]>([]);
   const { wishlistIds, handleRemoveWishlist } = useWishlist();
@@ -63,7 +66,7 @@ export function ProfilePage() {
         const data = await api.getAddresses(user.id);
         setAddresses(data);
       } catch (err) {
-        console.error('Failed to load addresses');
+        showToast('Failed to load addresses', 'error');
       }
     };
     loadAddresses();
@@ -134,10 +137,17 @@ export function ProfilePage() {
       try {
         setUploadingAvatar(true);
         const updated = await api.uploadUserAvatar(user.id, file);
-        // Refresh user data to show new avatar
-        window.location.reload();
+        const nextUser = {
+          id: updated.id,
+          email: updated.email,
+          username: updated.username,
+          name: updated.name,
+          role: updated.role,
+          avatar: updated.avatar,
+        };
+        setUserData(nextUser);
       } catch (err) {
-        console.error('Failed to upload avatar');
+        showToast('Failed to upload avatar', 'error');
       } finally {
         setUploadingAvatar(false);
       }
@@ -149,7 +159,6 @@ export function ProfilePage() {
     return (
       <div className="view">
         <div className="error">Please log in to view your profile</div>
-        <Link to="/login" className="btn-primary">Login</Link>
       </div>
     );
   }
@@ -161,7 +170,7 @@ export function ProfilePage() {
           <div className="profile-avatar-wrapper">
             <div className="profile-avatar">
               {user.avatar ? (
-                <img src={user.avatar} alt={displayName} />
+                <img src={getAvatarUrl(user.avatar)} alt={displayName} loading="lazy" />
               ) : (
                 <span>👤</span>
               )}
@@ -243,7 +252,7 @@ export function ProfilePage() {
                   <div key={item.id} className="profile-product">
                     <div className="profile-product-info" onClick={() => navigate(`/shop/product/${item.id}`)}>
                       {item.image ? (
-                        <img src={item.image} alt={item.name} />
+                        <img src={getProductImageUrl(item.image)} alt={item.name} loading="lazy" />
                       ) : (
                         <div className="profile-product-placeholder">{item.name}</div>
                       )}
@@ -269,7 +278,7 @@ export function ProfilePage() {
                   <div key={item.id} className="profile-product" onClick={() => navigate(`/shop/product/${item.id}`)}>
                     <div className="profile-product-info">
                       {item.image ? (
-                        <img src={item.image} alt={item.name} />
+                        <img src={getProductImageUrl(item.image)} alt={item.name} loading="lazy" />
                       ) : (
                         <div className="profile-product-placeholder">{item.name}</div>
                       )}
@@ -317,7 +326,7 @@ export function ProfilePage() {
                   setShowAddressForm(false);
                   setEditingAddress(null);
                 } catch (err) {
-                  console.error('Failed to save address');
+                  showToast('Failed to save address', 'error');
                 }
               }}>
                 <input name="label" placeholder="Label (e.g., Home, Work)" defaultValue={editingAddress?.label} required />

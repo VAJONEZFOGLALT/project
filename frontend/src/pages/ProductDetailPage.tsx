@@ -7,6 +7,7 @@ import { useWishlist } from '../hooks/useWishlist';
 import { useToast } from '../contexts/ToastContext';
 import { ReviewsModal } from '../components/ReviewsModal';
 import { ProductDetailSkeleton } from '../components/SkeletonLoader';
+import { getDetailImageUrl } from '../utils/imageOptimization';
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -24,6 +25,7 @@ export default function ProductDetailPage() {
   const [reviewSummary, setReviewSummary] = useState<{ average: number; count: number }>({ average: 0, count: 0 });
   const [isReviewsModalOpen, setIsReviewsModalOpen] = useState(false);
   const [reviewsModalView, setReviewsModalView] = useState<'list' | 'write'>('list');
+  const [addedToCart, setAddedToCart] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -84,6 +86,9 @@ export default function ProductDetailPage() {
     if (product) {
       const payload = { productId: product.id, name: product.name, price: Number(product.price) };
       add(payload, quantity);
+      setAddedToCart(true);
+      showToast(`Added ${quantity} × ${product.name} to cart`, 'success');
+      setTimeout(() => setAddedToCart(false), 2000);
     }
   }
 
@@ -150,7 +155,12 @@ export default function ProductDetailPage() {
         <div className="detail-left">
           <div className="detail-image-frame">
             {product.image ? (
-              <img src={product.image} alt={product.name} className="detail-image" />
+              <img 
+                src={getDetailImageUrl(product.image)} 
+                alt={product.name} 
+                className="detail-image"
+                loading="lazy"
+              />
             ) : (
               <div className="detail-image-placeholder">{product.name}</div>
             )}
@@ -203,7 +213,7 @@ export default function ProductDetailPage() {
             </div>
           </div>
           <div className="detail-footer">
-            <div className="price-large">{Number(product.price).toFixed(2)}</div>
+            <div className="price-large">${Number(product.price).toFixed(2)}</div>
             <div className="qty-selector">
               <label>Quantity:</label>
               <input
@@ -215,7 +225,17 @@ export default function ProductDetailPage() {
                 disabled={isOutOfStock}
               />
             </div>
-            <button onClick={handleAdd} className="btn-primary" disabled={isOutOfStock}>Add to Cart</button>
+            <button 
+              onClick={handleAdd} 
+              className={`btn-primary ${addedToCart ? 'success' : ''}`} 
+              disabled={isOutOfStock}
+              style={{
+                transition: 'all 0.3s ease',
+                backgroundColor: addedToCart ? 'var(--success)' : '',
+              }}
+            >
+              {addedToCart ? '✓ Added to Cart' : 'Add to Cart'}
+            </button>
           </div>
         </div>
       </div>

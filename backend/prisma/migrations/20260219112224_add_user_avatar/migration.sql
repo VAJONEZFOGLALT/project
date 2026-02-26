@@ -1,2 +1,2 @@
 -- AlterTable
-ALTER TABLE `users` ADD COLUMN `avatar` VARCHAR(191) NULL;
+ALTER TABLE `Users` ADD COLUMN `avatar` VARCHAR(191) NULL;

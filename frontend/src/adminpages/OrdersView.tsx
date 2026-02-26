@@ -10,6 +10,10 @@ export default function OrdersView() {
 
   const [userId, setUserId] = useState<number>(0);
   const [items, setItems] = useState<OrderItemInput[]>([{ productId: 0, quantity: 1 }]);
+  const [query, setQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+  const skeletonRows = Array.from({ length: 5 });
 
   async function load() {
     setLoading(true);
@@ -24,6 +28,7 @@ export default function OrdersView() {
     }
   }
   useEffect(() => { load(); }, []);
+  useEffect(() => { setPage(1); }, [query]);
 
   function addItem() {
     const next = items.slice();
@@ -52,10 +57,26 @@ export default function OrdersView() {
   async function onCreate(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    if (Number(userId) <= 0) {
+      setError('User ID must be greater than 0');
+      return;
+    }
+    if (items.length === 0) {
+      setError('Add at least one item');
+      return;
+    }
     try {
       const mappedItems: { productId: number; quantity: number }[] = [];
       for (let i = 0; i < items.length; i += 1) {
         const it = items[i];
+        if (Number(it.productId) <= 0) {
+          setError('Product ID must be greater than 0');
+          return;
+        }
+        if (Number(it.quantity) < 1) {
+          setError('Quantity must be at least 1');
+          return;
+        }
         mappedItems.push({ productId: Number(it.productId), quantity: Number(it.quantity) });
       }
       const payload = { userId: Number(userId), items: mappedItems };
@@ -79,6 +100,18 @@ export default function OrdersView() {
       setError(e.message);
     }
   }
+
+  const trimmed = query.trim().toLowerCase();
+  const filtered = trimmed
+    ? orders.filter((o: any) =>
+        String(o.id || '').toLowerCase().includes(trimmed) ||
+        String(o.userId || '').toLowerCase().includes(trimmed)
+      )
+    : orders;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const start = (currentPage - 1) * pageSize;
+  const pagedOrders = filtered.slice(start, start + pageSize);
 
   return (
     <div className="view">
@@ -111,8 +144,17 @@ export default function OrdersView() {
         <button type="submit" disabled={loading}>Create Order</button>
       </form>
 
+      <div className="search-bar">
+        <input
+          type="text"
+          placeholder="Search by order id or user id"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      </div>
+
       <div className="list">
-        {loading ? <p>Loading…</p> : (
+        {loading ? (
           <table>
             <thead>
               <tr>
@@ -122,7 +164,28 @@ export default function OrdersView() {
               </tr>
             </thead>
             <tbody>
-              {orders?.map((o: any) => (
+              {skeletonRows.map((_, idx) => (
+                <tr key={`s-${idx}`}>
+                  <td><div className="skeleton-line" /></td>
+                  <td><div className="skeleton-line" /></td>
+                  <td><div className="skeleton-line" /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : pagedOrders.length === 0 ? (
+          <p className="muted">No orders found.</p>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>User ID</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pagedOrders.map((o: any) => (
                 <tr key={o.id}>
                   <td>{o.id}</td>
                   <td>{o.userId}</td>
@@ -133,6 +196,18 @@ export default function OrdersView() {
           </table>
         )}
       </div>
+
+      {!loading && filtered.length > pageSize && (
+        <div className="pager">
+          <button type="button" disabled={currentPage <= 1} onClick={() => setPage(currentPage - 1)}>
+            Prev
+          </button>
+          <span className="muted">Page {currentPage} of {totalPages}</span>
+          <button type="button" disabled={currentPage >= totalPages} onClick={() => setPage(currentPage + 1)}>
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 }

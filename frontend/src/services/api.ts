@@ -5,12 +5,80 @@ if (typeof rawBaseUrl === 'string' && rawBaseUrl.length > 0) {
 }
 
 let authToken = '';
+let refreshToken = '';
 const storedToken = localStorage.getItem('authToken');
+const storedRefresh = localStorage.getItem('refreshToken');
 if (storedToken) {
   authToken = storedToken;
 }
+if (storedRefresh) {
+  refreshToken = storedRefresh;
+}
 
-async function request<T>(path: string, init?: RequestInit) {
+let isRefreshing = false;
+let failedQueue: Array<{ resolve: (token: string) => void; reject: (err: Error) => void }> = [];
+
+const processQueue = (err: Error | null, token: string | null) => {
+  failedQueue.forEach(p => {
+    if (err) {
+      p.reject(err);
+    } else if (token) {
+      p.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
+const applyTokens = (token: string, newRefresh?: string) => {
+  authToken = token;
+  localStorage.setItem('authToken', token);
+  if (newRefresh) {
+    refreshToken = newRefresh;
+    localStorage.setItem('refreshToken', newRefresh);
+  }
+};
+
+const clearTokens = () => {
+  authToken = '';
+  refreshToken = '';
+  localStorage.removeItem('authToken');
+  localStorage.removeItem('refreshToken');
+};
+
+async function refreshAccessToken(): Promise<string> {
+  if (!refreshToken) {
+    throw new Error('No refresh token');
+  }
+  if (isRefreshing) {
+    return new Promise((resolve, reject) => {
+      failedQueue.push({ resolve, reject });
+    });
+  }
+
+  isRefreshing = true;
+  try {
+    const res = await fetch(`${BASE_URL}/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
+    });
+    if (!res.ok) {
+      throw new Error('Refresh failed');
+    }
+    const data = (await res.json()) as { token: string; refreshToken?: string };
+    applyTokens(data.token, data.refreshToken);
+    processQueue(null, data.token);
+    return data.token;
+  } catch (err) {
+    clearTokens();
+    processQueue(err as Error, null);
+    throw err;
+  } finally {
+    isRefreshing = false;
+  }
+}
+
+async function request<T>(path: string, init?: RequestInit, retry = true) {
   const headers: Record<string, string> = {};
   const isFormData = init?.body instanceof FormData;
   if (!isFormData) {
@@ -30,6 +98,17 @@ async function request<T>(path: string, init?: RequestInit) {
   }
 
   const res = await fetch(url, requestInit);
+  
+  // Handle token expiration - retry with fresh token if available
+  if (res.status === 401 && retry && refreshToken) {
+    try {
+      await refreshAccessToken();
+      return request<T>(path, init, false);
+    } catch {
+      // Fall through to error handling below
+    }
+  }
+
   if (!res.ok) {
     let text = '';
     try {
@@ -54,33 +133,34 @@ async function request<T>(path: string, init?: RequestInit) {
 export const api = {
   // Auth
   register: async (data: { email: string; password: string; username: string; name?: string }) => {
-    const res = await request<{ id: number; email: string; username: string; name: string; token: string }>('/auth/register', {
+    const res = await request<{ id: number; email: string; username: string; name: string; token: string; refreshToken: string }>('/auth/register', {
       method: 'POST',
       body: JSON.stringify(data),
     });
-    authToken = res.token;
-    localStorage.setItem('authToken', res.token);
+    applyTokens(res.token, res.refreshToken);
     return res;
   },
 
-  login: async (data: { email: string; password: string }) => {
-    const res = await request<{ id: number; email: string; username: string; name: string; token: string }>('/auth/login', {
+  login: async (data: { identifier: string; password: string }) => {
+    const res = await request<{ id: number; email: string; username: string; name: string; token: string; refreshToken: string }>('/auth/login', {
       method: 'POST',
       body: JSON.stringify(data),
     });
-    authToken = res.token;
-    localStorage.setItem('authToken', res.token);
+    applyTokens(res.token, res.refreshToken);
     return res;
   },
 
   logout: () => {
-    authToken = '';
-    localStorage.removeItem('authToken');
+    clearTokens();
   },
 
   setToken: (token: string) => {
     authToken = token;
     localStorage.setItem('authToken', token);
+  },
+
+  setTokens: (token: string, newRefresh?: string) => {
+    applyTokens(token, newRefresh);
   },
 
   // Users

@@ -19,6 +19,13 @@ const users_service_1 = require("./users.service");
 const create_user_dto_1 = require("./dto/create-user.dto");
 const update_user_dto_1 = require("./dto/update-user.dto");
 const cloudinary_service_1 = require("../cloudinary/cloudinary.service");
+const sanitizeUser = (user) => {
+    if (!user)
+        return user;
+    const { password_hash, ...safe } = user;
+    return safe;
+};
+const sanitizeUsers = (users) => users.map(sanitizeUser);
 let UsersController = class UsersController {
     usersService;
     cloudinaryService;
@@ -26,24 +33,30 @@ let UsersController = class UsersController {
         this.usersService = usersService;
         this.cloudinaryService = cloudinaryService;
     }
-    create(createUserDto) {
-        return this.usersService.create(createUserDto);
+    async create(createUserDto) {
+        const created = await this.usersService.create(createUserDto);
+        return sanitizeUser(created);
     }
-    findAll() {
-        return this.usersService.findAll();
+    async findAll() {
+        const users = await this.usersService.findAll();
+        return sanitizeUsers(users);
     }
-    findOne(id) {
-        return this.usersService.findOne(+id);
+    async findOne(id) {
+        const user = await this.usersService.findOne(+id);
+        return sanitizeUser(user);
     }
-    update(id, updateUserDto) {
-        return this.usersService.update(+id, updateUserDto);
+    async update(id, updateUserDto) {
+        const updated = await this.usersService.update(+id, updateUserDto);
+        return sanitizeUser(updated);
     }
     async uploadAvatar(id, file) {
         const upload = await this.cloudinaryService.uploadImage(file, 'avatars');
-        return this.usersService.update(+id, { avatar: upload.url });
+        const updated = await this.usersService.update(+id, { avatar: upload.url });
+        return sanitizeUser(updated);
     }
-    remove(id) {
-        return this.usersService.remove(+id);
+    async remove(id) {
+        const removed = await this.usersService.remove(+id);
+        return sanitizeUser(removed);
     }
 };
 exports.UsersController = UsersController;
@@ -52,20 +65,20 @@ __decorate([
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_user_dto_1.CreateUserDto]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], UsersController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], UsersController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], UsersController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':id'),
@@ -73,7 +86,7 @@ __decorate([
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, update_user_dto_1.UpdateUserDto]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], UsersController.prototype, "update", null);
 __decorate([
     (0, common_1.Post)(':id/avatar'),
@@ -89,7 +102,7 @@ __decorate([
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], UsersController.prototype, "remove", null);
 exports.UsersController = UsersController = __decorate([
     (0, common_1.Controller)('users'),

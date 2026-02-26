@@ -7,6 +7,10 @@ export default function UsersView() {
   const [error, setError] = useState<string | null>(null);
 
   const [form, setForm] = useState({ username: '', email: '', password: '' });
+  const [query, setQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+  const skeletonRows = Array.from({ length: 5 });
 
   const updateForm = (patch: Partial<typeof form>) => {
     setForm(prev => ({ ...prev, ...patch }));
@@ -26,10 +30,23 @@ export default function UsersView() {
   }
 
   useEffect(() => { load(); }, []);
+  useEffect(() => { setPage(1); }, [query]);
 
   async function onCreate(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    if (!form.username.trim()) {
+      setError('Username is required');
+      return;
+    }
+    if (!form.email.includes('@')) {
+      setError('Valid email is required');
+      return;
+    }
+    if (form.password.trim().length < 8) {
+      setError('Password must be at least 8 characters');
+      return;
+    }
     try {
       const payload = { username: form.username, email: form.email, password: form.password };
       await api.createUser(payload);
@@ -64,6 +81,18 @@ export default function UsersView() {
     }
   }
 
+  const trimmed = query.trim().toLowerCase();
+  const filtered = trimmed
+    ? users.filter((u: any) =>
+        String(u.username || '').toLowerCase().includes(trimmed) ||
+        String(u.email || '').toLowerCase().includes(trimmed)
+      )
+    : users;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const start = (currentPage - 1) * pageSize;
+  const pagedUsers = filtered.slice(start, start + pageSize);
+
   return (
     <div className="view">
       <h2>Users</h2>
@@ -86,8 +115,17 @@ export default function UsersView() {
         <button type="submit" disabled={loading}>Create User</button>
       </form>
 
+      <div className="search-bar">
+        <input
+          type="text"
+          placeholder="Search by username or email"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      </div>
+
       <div className="list">
-        {loading ? <p>Loading…</p> : (
+        {loading ? (
           <table>
             <thead>
               <tr>
@@ -99,7 +137,32 @@ export default function UsersView() {
               </tr>
             </thead>
             <tbody>
-              {users?.map((u: any) => (
+              {skeletonRows.map((_, idx) => (
+                <tr key={`s-${idx}`}>
+                  <td><div className="skeleton-line" /></td>
+                  <td><div className="skeleton-line" /></td>
+                  <td><div className="skeleton-line" /></td>
+                  <td><div className="skeleton-line" /></td>
+                  <td><div className="skeleton-line" /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : pagedUsers.length === 0 ? (
+          <p className="muted">No users found.</p>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pagedUsers.map((u: any) => (
                 <tr key={u.id}>
                   <td>{u.id}</td>
                   <td>{u.username}</td>
@@ -123,6 +186,18 @@ export default function UsersView() {
           </table>
         )}
       </div>
+
+      {!loading && filtered.length > pageSize && (
+        <div className="pager">
+          <button type="button" disabled={currentPage <= 1} onClick={() => setPage(currentPage - 1)}>
+            Prev
+          </button>
+          <span className="muted">Page {currentPage} of {totalPages}</span>
+          <button type="button" disabled={currentPage >= totalPages} onClick={() => setPage(currentPage + 1)}>
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 }

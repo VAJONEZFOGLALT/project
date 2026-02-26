@@ -9,7 +9,7 @@ interface LoginModalProps {
 }
 
 export function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalProps) {
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -22,9 +22,9 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalPr
     setIsLoading(true);
 
     try {
-      const currentEmail = email;
+      const currentIdentifier = identifier;
       const currentPassword = password;
-      await login(currentEmail, currentPassword);
+      await login(currentIdentifier, currentPassword);
       onClose();
       navigate('/shop');
     } catch (err) {
@@ -55,14 +55,14 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalPr
 
           <form onSubmit={handleSubmit} className="modal-form">
             <div className="modal-form-group">
-              <label htmlFor="email">Email:</label>
+              <label htmlFor="identifier">Email or username:</label>
               <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                id="identifier"
+                type="text"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
                 required
-                placeholder="your@email.com"
+                placeholder="email or username"
               />
             </div>
 

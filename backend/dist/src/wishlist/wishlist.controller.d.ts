@@ -14,32 +14,32 @@ export declare class WishlistController {
         };
     } & {
         id: number;
+        createdAt: Date;
         userId: number;
         productId: number;
-        createdAt: Date;
     })[]>;
     add(body: {
         userId: number;
         productId: number;
     }): Promise<{
         id: number;
+        createdAt: Date;
         userId: number;
         productId: number;
-        createdAt: Date;
     }>;
     remove(id: string): import("../../generated/prisma/models").Prisma__WishlistClient<{
         id: number;
+        createdAt: Date;
         userId: number;
         productId: number;
-        createdAt: Date;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, {
         omit: import("../../generated/prisma/internal/prismaNamespace").GlobalOmitConfig | undefined;
     }>;
     removeByUserProduct(userId: string, productId: string): Promise<{
         id: number;
+        createdAt: Date;
         userId: number;
         productId: number;
-        createdAt: Date;
     } | null>;
     isInWishlist(userId: string, productId: string): Promise<boolean>;
 }

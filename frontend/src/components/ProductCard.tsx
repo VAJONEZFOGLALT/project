@@ -1,5 +1,6 @@
 import { useCart } from '../contexts/CartContext';
 import { useNavigate } from 'react-router-dom';
+import { getProductImageUrl } from '../utils/imageOptimization';
 
 type ProductCardProps = {
   product: any;
@@ -49,7 +50,12 @@ export default function ProductCard({
     <div className="card product-card" onClick={handleOpen} style={{ cursor: cursorStyle }}>
       <div className="product-media">
         {product.image ? (
-          <img src={product.image} alt={product.name} className="product-image" />
+          <img 
+            src={getProductImageUrl(product.image)} 
+            alt={product.name} 
+            className="product-image"
+            loading="lazy"
+          />
         ) : (
           <div className="product-image-placeholder">{product.name}</div>
         )}

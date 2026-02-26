@@ -10,6 +10,10 @@ generator client {
   moduleFormat = "cjs"
 }
 
+generator client_default {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
@@ -44,6 +48,8 @@ model Products {
   wishlist    Wishlist[]
   recentlyViewed RecentlyViewed[]
   compareItems CompareItems[]
+
+  @@index([category])
 }
 
 model Reviews {
@@ -127,6 +133,9 @@ model Orders {
   trackingNumber  String?
   user            Users          @relation(fields: [userId], references: [id])
   orderItems      OrderItems[]
+
+  @@index([userId])
+  @@index([createdAt])
 }
 
 model OrderItems {
@@ -138,6 +147,9 @@ model OrderItems {
 
   order   Orders   @relation(fields: [orderId], references: [id])
   product Products @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
 }
 
 model Address {

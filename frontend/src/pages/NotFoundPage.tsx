@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 export default function NotFoundPage() {
   const navigate = useNavigate();
   const handleGoHome = () => {
-    navigate('/');
+    navigate('/shop');
   };
   return (
     <div className="view not-found">

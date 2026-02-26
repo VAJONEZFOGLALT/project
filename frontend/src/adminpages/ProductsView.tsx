@@ -9,6 +9,10 @@ export default function ProductsView() {
   const [uploading, setUploading] = useState<Record<number, boolean>>({});
 
   const [form, setForm] = useState({ name: '', description: '', category: '', price: 0, stock: 0 });
+  const [query, setQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+  const skeletonRows = Array.from({ length: 5 });
 
   const updateForm = (patch: Partial<typeof form>) => {
     setForm(prev => ({ ...prev, ...patch }));
@@ -27,10 +31,27 @@ export default function ProductsView() {
     }
   }
   useEffect(() => { load(); }, []);
+  useEffect(() => { setPage(1); }, [query]);
 
   async function onCreate(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    if (!form.name.trim()) {
+      setError('Name is required');
+      return;
+    }
+    if (!form.category.trim()) {
+      setError('Category is required');
+      return;
+    }
+    if (Number(form.price) < 0) {
+      setError('Price must be 0 or more');
+      return;
+    }
+    if (Number(form.stock) < 0) {
+      setError('Stock must be 0 or more');
+      return;
+    }
     try {
       const payload = {
         name: form.name,
@@ -58,6 +79,18 @@ export default function ProductsView() {
       setError(e.message);
     }
   }
+
+  const trimmed = query.trim().toLowerCase();
+  const filtered = trimmed
+    ? products.filter((p: any) =>
+        String(p.name || '').toLowerCase().includes(trimmed) ||
+        String(p.category || '').toLowerCase().includes(trimmed)
+      )
+    : products;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const start = (currentPage - 1) * pageSize;
+  const pagedProducts = filtered.slice(start, start + pageSize);
 
   async function onUploadImage(id: number) {
     const file = selectedFiles[id];
@@ -108,8 +141,17 @@ export default function ProductsView() {
         <button type="submit" disabled={loading}>Create Product</button>
       </form>
 
+      <div className="search-bar">
+        <input
+          type="text"
+          placeholder="Search by name or category"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      </div>
+
       <div className="list">
-        {loading ? <p>Loading…</p> : (
+        {loading ? (
           <table>
             <thead>
               <tr>
@@ -123,7 +165,36 @@ export default function ProductsView() {
               </tr>
             </thead>
             <tbody>
-              {products?.map((p: any) => (
+              {skeletonRows.map((_, idx) => (
+                <tr key={`s-${idx}`}>
+                  <td><div className="skeleton-line" /></td>
+                  <td><div className="skeleton-line" /></td>
+                  <td><div className="skeleton-line" /></td>
+                  <td><div className="skeleton-line" /></td>
+                  <td><div className="skeleton-line" /></td>
+                  <td><div className="skeleton-line" /></td>
+                  <td><div className="skeleton-line" /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : pagedProducts.length === 0 ? (
+          <p className="muted">No products found.</p>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pagedProducts.map((p: any) => (
                 <tr key={p.id}>
                   <td>{p.id}</td>
                   <td>
@@ -162,6 +233,18 @@ export default function ProductsView() {
           </table>
         )}
       </div>
+
+      {!loading && filtered.length > pageSize && (
+        <div className="pager">
+          <button type="button" disabled={currentPage <= 1} onClick={() => setPage(currentPage - 1)}>
+            Prev
+          </button>
+          <span className="muted">Page {currentPage} of {totalPages}</span>
+          <button type="button" disabled={currentPage >= totalPages} onClick={() => setPage(currentPage + 1)}>
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 }

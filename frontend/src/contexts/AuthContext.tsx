@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { api } from '../services/api';
-import { hashPasswordSha256 } from '../utils/crypto';
 
 interface User {
   id: number;
@@ -15,9 +14,10 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (identifier: string, password: string) => Promise<void>;
   register: (email: string, password: string, username: string, name?: string) => Promise<void>;
   updateProfile: (data: { name?: string; email?: string; password?: string }) => Promise<void>;
+  setUserData: (data: User | null) => void;
   logout: () => void;
 }
 
@@ -30,8 +30,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Check if user is already authenticated on mount
   useEffect(() => {
     const token = localStorage.getItem('authToken');
+    const refreshToken = localStorage.getItem('refreshToken');
     if (token) {
-      api.setToken(token);
+      api.setTokens(token, refreshToken || undefined);
 
       // In a real app, verify token with backend
       // For now, just assume valid
@@ -45,6 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } catch (e) {
           // Token is invalid
           localStorage.removeItem('authToken');
+          localStorage.removeItem('refreshToken');
           localStorage.removeItem('userData');
         }
       }
@@ -52,11 +54,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(false);
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (identifier: string, password: string) => {
     setIsLoading(true);
     try {
-      const hashedPassword = await hashPasswordSha256(password);
-      const res = await api.login({ email, password: hashedPassword });
+      const res = await api.login({ identifier, password });
       const userData = { id: res.id, email: res.email, username: res.username, name: res.name, role: res.role };
       setUser(userData);
       const serialized = JSON.stringify(userData);
@@ -69,8 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = async (email: string, password: string, username: string, name?: string) => {
     setIsLoading(true);
     try {
-      const hashedPassword = await hashPasswordSha256(password);
-      const res = await api.register({ email, password: hashedPassword, username, name });
+      const res = await api.register({ email, password, username, name });
       const role = res.role || 'USER';
       const userData = { id: res.id, email: res.email, username: res.username, name: res.name, role };
       setUser(userData);
@@ -87,22 +87,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     setIsLoading(true);
     try {
-      const payload = { ...data };
-      if (payload.password) {
-        payload.password = await hashPasswordSha256(payload.password);
-      }
-      const updated = await api.updateUser(user.id, payload);
+      const updated = await api.updateUser(user.id, data);
       const userData = {
         id: updated.id,
         email: updated.email,
         username: updated.username,
         name: updated.name,
         role: updated.role,
+        avatar: updated.avatar,
       };
       setUser(userData);
       localStorage.setItem('userData', JSON.stringify(userData));
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const setUserData = (data: User | null) => {
+    setUser(data);
+    if (data) {
+      localStorage.setItem('userData', JSON.stringify(data));
+    } else {
+      localStorage.removeItem('userData');
     }
   };
 
@@ -115,7 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAuthenticated = !!user;
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, isAuthenticated, login, register, updateProfile, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, isAuthenticated, login, register, updateProfile, setUserData, logout }}>
       {children}
     </AuthContext.Provider>
   );

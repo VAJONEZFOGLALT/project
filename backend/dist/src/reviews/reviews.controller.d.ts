@@ -6,17 +6,17 @@ export declare class ReviewsController {
     constructor(reviewsService: ReviewsService);
     findAll(): import("../../generated/prisma/internal/prismaNamespace").PrismaPromise<({
         user: {
+            id: number;
             username: string;
             email: string;
             password_hash: string;
             name: string;
             avatar: string | null;
             role: string;
-            id: number;
         };
         product: {
-            name: string;
             id: number;
+            name: string;
             description: string | null;
             category: string;
             price: number;
@@ -34,13 +34,13 @@ export declare class ReviewsController {
     })[]>;
     findByProduct(productId: string): import("../../generated/prisma/internal/prismaNamespace").PrismaPromise<({
         user: {
+            id: number;
             username: string;
             email: string;
             password_hash: string;
             name: string;
             avatar: string | null;
             role: string;
-            id: number;
         };
     } & {
         id: number;

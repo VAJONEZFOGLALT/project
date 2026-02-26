@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState } from 'react';
+import { createContext, useContext, useState } from 'react';
 import { useToast } from './ToastContext';
 
 export type CartItem = {
@@ -8,103 +8,55 @@ export type CartItem = {
   quantity: number;
 };
 
-export type CartContextValue = {
+type CartContextType = {
   items: CartItem[];
-  add: (item: Omit<CartItem, 'quantity'>, quantity?: number) => void;
-  update: (productId: number, quantity: number) => void;
+  add: (item: Omit<CartItem, 'quantity'>, qty?: number) => void;
+  update: (productId: number, qty: number) => void;
   remove: (productId: number) => void;
   clear: () => void;
   total: number;
 };
 
-const CartContext = createContext<CartContextValue | null>(null);
+const CartContext = createContext<CartContextType | null>(null);
 
-export function CartProvider({ children }: { children: React.ReactNode }) {
+export default function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const { showToast } = useToast();
 
-  function add(item: Omit<CartItem, 'quantity'>, quantity = 1) {
-    let isNewItem = true;
-    
+  const add = (item: Omit<CartItem, 'quantity'>, qty = 1) => {
     setItems(prev => {
-      let foundIndex = -1;
-      for (let i = 0; i < prev.length; i += 1) {
-        if (prev[i].productId === item.productId) {
-          foundIndex = i;
-          break;
-        }
+      const exists = prev.find(i => i.productId === item.productId);
+      if (exists) {
+        showToast(`🛒 Updated "${item.name}"`, 'success');
+        return prev.map(i => i.productId === item.productId ? { ...i, quantity: i.quantity + qty } : i);
       }
-
-      if (foundIndex !== -1) {
-        isNewItem = false;
-        const next = prev.slice();
-        const existing = next[foundIndex];
-        next[foundIndex] = { ...existing, quantity: existing.quantity + quantity };
-        return next;
-      }
-
-      const nextItem: CartItem = { ...item, quantity };
-      return prev.concat(nextItem);
+      showToast(`🛒 Added "${item.name}"`, 'success');
+      return [...prev, { ...item, quantity: qty }];
     });
+  };
 
-    // Show toast notification
-    if (isNewItem) {
-      showToast(`🛒 "${item.name}" added to cart!`, 'success');
-    } else {
-      showToast(`🛒 Updated "${item.name}" quantity in cart!`, 'success');
-    }
-  }
+  const update = (productId: number, qty: number) => {
+    setItems(prev => prev.map(i => i.productId === productId ? { ...i, quantity: qty } : i));
+  };
 
-  function update(productId: number, quantity: number) {
-    setItems(prev => {
-      const next = prev.slice();
-      for (let i = 0; i < next.length; i += 1) {
-        const item = next[i];
-        if (item.productId === productId) {
-          next[i] = { ...item, quantity };
-        }
-      }
-      return next;
-    });
-  }
+  const remove = (productId: number) => {
+    const name = items.find(i => i.productId === productId)?.name;
+    setItems(prev => prev.filter(i => i.productId !== productId));
+    if (name) showToast(`🗑️ Removed "${name}"`, 'info');
+  };
 
-  function remove(productId: number) {
-    let removedName = '';
-    
-    setItems(prev => {
-      const next: CartItem[] = [];
-      for (let i = 0; i < prev.length; i += 1) {
-        const item = prev[i];
-        if (item.productId !== productId) {
-          next.push(item);
-        } else {
-          removedName = item.name;
-        }
-      }
-      return next;
-    });
-
-    if (removedName) {
-      showToast(`🗑️ "${removedName}" removed from cart`, 'info');
-    }
-  }
-
-  function clear() {
+  const clear = () => {
     setItems([]);
     showToast('🛒 Cart cleared', 'info');
-  }
+  };
 
-  const total = useMemo(() => {
-    let sum = 0;
-    for (let i = 0; i < items.length; i += 1) {
-      const item = items[i];
-      sum += item.price * item.quantity;
-    }
-    return sum;
-  }, [items]);
+  const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  const value: CartContextValue = { items, add, update, remove, clear, total };
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+  return (
+    <CartContext.Provider value={{ items, add, update, remove, clear, total }}>
+      {children}
+    </CartContext.Provider>
+  );
 }
 
 export function useCart() {

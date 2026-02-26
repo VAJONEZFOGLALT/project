@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
+import { useToast } from '../contexts/ToastContext';
 
 type OrderStatus = 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
 type CourierService = 'UPS' | 'PACKETA' | 'DPD' | 'INPOST';
@@ -27,8 +28,9 @@ function getCourierIcon(courier: CourierService): { icon: string; name: string }
   return couriers[courier] || { icon: '📦', name: courier };
 }
 
-export function OrdersPage() {
+export default function OrdersPage() {
   const { user } = useAuth();
+  const { showToast } = useToast();
   const [orders, setOrders] = useState<any[]>([]);
   const [orderItems, setOrderItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -58,7 +60,7 @@ export function OrdersPage() {
         setOrders(userOrders);
         setOrderItems(items);
       } catch (e) {
-        console.error('Failed to load orders');
+        showToast('Failed to load orders', 'error');
       } finally {
         setLoading(false);
       }
@@ -73,7 +75,6 @@ export function OrdersPage() {
     return (
       <div className="view">
         <div className="error">Please log in to view your orders</div>
-        <Link to="/login" className="btn-primary">Login</Link>
       </div>
     );
   }

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { getThumbnailUrl } from '../utils/imageOptimization';
 
 export default function CompareDrawer({
   items,
@@ -33,7 +34,7 @@ export default function CompareDrawer({
           {items.map((item) => (
             <div key={item.id} className="compare-drawer-item">
               {item.image ? (
-                <img src={item.image} alt={item.name} className="compare-item-image" />
+                <img src={getThumbnailUrl(item.image)} alt={item.name} className="compare-item-image" loading="lazy" />
               ) : (
                 <div className="compare-item-image-placeholder">No Image</div>
               )}

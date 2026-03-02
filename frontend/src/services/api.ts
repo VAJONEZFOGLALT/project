@@ -298,7 +298,7 @@ export const api = {
     courier?: string;
     shippingAddress?: string;
   }) => {
-    const created = await request<any>('/orders', { method: 'POST', body: JSON.stringify(data) });
+    const created = await request<{ id: number; userId: number; total: number; status: string; courier?: string; shippingAddress?: string }>('/orders', { method: 'POST', body: JSON.stringify(data) });
     return created;
   },
   deleteOrder: async (id: number) => {

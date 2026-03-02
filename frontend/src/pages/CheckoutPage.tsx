@@ -47,9 +47,8 @@ export default function CheckoutPage({ onSuccess }: { onSuccess?: (id: number) =
 
       const order = await api.createOrder({ userId, items: orderItems, courier, shippingAddress: shipping });
       clear();
-      const orderId = order?.id;
-      if (orderId !== undefined) {
-        onSuccess?.(orderId);
+      if (order?.id) {
+        onSuccess?.(order.id as number);
       }
       navigate('/shop/confirmation');
     } catch (e: any) {

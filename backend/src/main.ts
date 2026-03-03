@@ -24,6 +24,8 @@ async function bootstrap() {
     optionsSuccessStatus: 200,
   });
 
+  app.setGlobalPrefix('api');
+
   // --- Swagger / OpenAPI setup ---
   const config = new DocumentBuilder()
     .setTitle('WebShop API')

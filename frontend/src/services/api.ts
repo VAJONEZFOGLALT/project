@@ -13,28 +13,20 @@ const cloneRequestInit = (init: RequestInit): RequestInit => ({
 
 const withLeadingSlash = (path: string) => (path.startsWith('/') ? path : `/${path}`);
 
-const getFallbackPath = (path: string) => {
-  if (path.startsWith('/api/')) {
-    return path.replace(/^\/api/, '');
-  }
-  return `/api${path}`;
-};
-
-const fetchWithPathFallback = async (path: string, init: RequestInit) => {
+const withApiPrefix = (path: string) => {
   const normalizedPath = withLeadingSlash(path);
-  const firstResponse = await fetch(`${BASE_URL}${normalizedPath}`, cloneRequestInit(init));
-
-  if (firstResponse.status !== 404) {
-    return firstResponse;
+  if (normalizedPath.startsWith('/api/')) {
+    return normalizedPath;
   }
-
-  const fallbackPath = getFallbackPath(normalizedPath);
-  if (fallbackPath === normalizedPath) {
-    return firstResponse;
-  }
-
-  return fetch(`${BASE_URL}${fallbackPath}`, cloneRequestInit(init));
+  return `/api${normalizedPath}`;
 };
+
+const requestUrl = (path: string) => {
+  const normalizedBase = BASE_URL.replace(/\/api\/?$/, '');
+  return `${normalizedBase}${withApiPrefix(path)}`;
+};
+
+const fetchApi = (path: string, init: RequestInit) => fetch(requestUrl(path), cloneRequestInit(init));
 
 let authToken = '';
 let refreshToken = '';
@@ -144,7 +136,7 @@ async function refreshAccessToken(): Promise<string> {
 
   isRefreshing = true;
   try {
-    const res = await fetchWithPathFallback('/auth/refresh', {
+    const res = await fetchApi('/auth/refresh', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refreshToken }),
@@ -183,7 +175,7 @@ async function request<T>(path: string, init?: RequestInit, retry = true) {
     Object.assign(requestInit, init);
   }
 
-  const res = await fetchWithPathFallback(path, requestInit);
+  const res = await fetchApi(path, requestInit);
   
   // Handle token expiration - retry with fresh token if available
   if (res.status === 401 && retry && refreshToken) {

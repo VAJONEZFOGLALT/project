@@ -7,11 +7,20 @@ interface UseTranslateDynamicOptions {
 
 const translationCache = new Map<string, Map<string, string>>();
 
+const getApiBaseUrl = (): string => {
+  const rawBaseUrl = import.meta.env.VITE_API_URL;
+  if (typeof rawBaseUrl === 'string' && rawBaseUrl.length > 0) {
+    return rawBaseUrl;
+  }
+  return 'http://localhost:3000';
+};
+
 export const useTranslateDynamic = (options: UseTranslateDynamicOptions = {}) => {
   const { i18n } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { cache = true } = options;
+  const baseUrl = getApiBaseUrl();
 
   const translate = useCallback(
     async (text: string, targetLang?: string): Promise<string> => {
@@ -34,7 +43,7 @@ export const useTranslateDynamic = (options: UseTranslateDynamicOptions = {}) =>
       setError(null);
 
       try {
-        const response = await fetch('/api/translations/translate', {
+        const response = await fetch(`${baseUrl}/api/translations/translate`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -81,7 +90,7 @@ export const useTranslateDynamic = (options: UseTranslateDynamicOptions = {}) =>
       setError(null);
 
       try {
-        const response = await fetch('/api/translations/translate-batch', {
+        const response = await fetch(`${baseUrl}/api/translations/translate-batch`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -45,15 +45,15 @@ async function bootstrapServer(): Promise<express.Express> {
         .addTag('addresses', 'Shipping addresses')
         .build();
 
+      app.useGlobalPipes(new ValidationPipe());
+      app.setGlobalPrefix('api');
+
       const document = SwaggerModule.createDocument(app, config);
-      SwaggerModule.setup('api/docs', app, document, {
+      SwaggerModule.setup('docs', app, document, {
         swaggerOptions: {
           persistAuthorization: true,
         },
       });
-
-      app.useGlobalPipes(new ValidationPipe());
-      app.setGlobalPrefix('api');
       
       await app.init();
       

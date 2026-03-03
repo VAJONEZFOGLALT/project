@@ -7,12 +7,41 @@ interface UseTranslateDynamicOptions {
 
 const translationCache = new Map<string, Map<string, string>>();
 
+const normalizeBaseUrl = (value: string) => value.replace(/\/+$/, '');
+
 const getApiBaseUrl = (): string => {
   const rawBaseUrl = import.meta.env.VITE_API_URL;
   if (typeof rawBaseUrl === 'string' && rawBaseUrl.length > 0) {
-    return rawBaseUrl;
+    return normalizeBaseUrl(rawBaseUrl);
   }
-  return 'http://localhost:3000';
+  return normalizeBaseUrl('http://localhost:3000');
+};
+
+const cloneRequestInit = (init: RequestInit): RequestInit => ({
+  ...init,
+  headers: init.headers ? new Headers(init.headers) : undefined,
+});
+
+const postJsonWithPathFallback = async (
+  baseUrl: string,
+  primaryPath: string,
+  fallbackPath: string,
+  body: unknown,
+) => {
+  const init: RequestInit = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  };
+
+  const primaryResponse = await fetch(`${baseUrl}${primaryPath}`, cloneRequestInit(init));
+  if (primaryResponse.status !== 404) {
+    return primaryResponse;
+  }
+
+  return fetch(`${baseUrl}${fallbackPath}`, cloneRequestInit(init));
 };
 
 export const useTranslateDynamic = (options: UseTranslateDynamicOptions = {}) => {
@@ -43,17 +72,16 @@ export const useTranslateDynamic = (options: UseTranslateDynamicOptions = {}) =>
       setError(null);
 
       try {
-        const response = await fetch(`${baseUrl}/api/translations/translate`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
+        const response = await postJsonWithPathFallback(
+          baseUrl,
+          '/translations/translate',
+          '/api/translations/translate',
+          {
             text,
             sourceLang: 'en',
             targetLang: target,
-          }),
-        });
+          },
+        );
 
         if (!response.ok) {
           throw new Error(`Translation failed: ${response.statusText}`);
@@ -90,17 +118,16 @@ export const useTranslateDynamic = (options: UseTranslateDynamicOptions = {}) =>
       setError(null);
 
       try {
-        const response = await fetch(`${baseUrl}/api/translations/translate-batch`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
+        const response = await postJsonWithPathFallback(
+          baseUrl,
+          '/translations/translate-batch',
+          '/api/translations/translate-batch',
+          {
             texts,
             sourceLang: 'en',
             targetLang: target,
-          }),
-        });
+          },
+        );
 
         if (!response.ok) {
           throw new Error(`Batch translation failed: ${response.statusText}`);

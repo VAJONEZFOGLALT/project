@@ -26,8 +26,10 @@ export default function ProfilePage() {
   const [totalSpent, setTotalSpent] = useState(0);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [addresses, setAddresses] = useState<any[]>([]);
-  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [showAddressModal, setShowAddressModal] = useState(false);
   const [editingAddress, setEditingAddress] = useState<any>(null);
+  const [wishlistSlide, setWishlistSlide] = useState(0);
+  const [recentlyViewedSlide, setRecentlyViewedSlide] = useState(0);
 
   const roleLabel = user?.role === 'ADMIN' ? t('profile.adminAccount') : `👤 ${t('profile.customer')}`;
   const accountTypeLabel = user?.role === 'ADMIN' ? t('profile.administrator') : t('profile.customer');
@@ -231,23 +233,46 @@ export default function ProfilePage() {
             ) : wishlistItems.length === 0 ? (
               <p className="muted">{t('profile.emptyWishlist')}</p>
             ) : (
-              <div className="profile-product-list">
-                {wishlistItems.map((item) => (
-                  <div key={item.id} className="profile-product-mini">
-                    <div className="profile-product-mini-img" onClick={() => navigate(`/shop/product/${item.id}`)}>
-                      {item.image ? (
-                        <img src={getProductImageUrl(item.image)} alt={item.name} loading="lazy" />
-                      ) : (
-                        <div className="profile-product-placeholder-mini">{item.name}</div>
-                      )}
+              <div className="profile-carousel">
+                <div className="carousel-track" style={{ transform: `translateX(calc(-${wishlistSlide * 100}% / ${Math.min(wishlistItems.length, 5)}))` }}>
+                  {wishlistItems.map((item) => (
+                    <div key={item.id} className="carousel-item">
+                      <div className="profile-product-mini">
+                        <div className="profile-product-mini-img" onClick={() => navigate(`/shop/product/${item.id}`)}>
+                          {item.image ? (
+                            <img src={getProductImageUrl(item.image)} alt={item.name} loading="lazy" />
+                          ) : (
+                            <div className="profile-product-placeholder-mini">{item.name}</div>
+                          )}
+                        </div>
+                        <div className="profile-product-mini-info">
+                          <strong onClick={() => navigate(`/shop/product/${item.id}`)} style={{cursor: 'pointer'}}>{item.name}</strong>
+                          <div className="muted">${Number(item.price).toFixed(2)}</div>
+                          <button className="btn-delete" onClick={() => handleRemoveWishlist(item.id, item.name)}>Remove</button>
+                        </div>
+                      </div>
                     </div>
-                    <div className="profile-product-mini-info">
-                      <strong onClick={() => navigate(`/shop/product/${item.id}`)} style={{cursor: 'pointer'}}>{item.name}</strong>
-                      <div className="muted">${Number(item.price).toFixed(2)}</div>
-                      <button className="btn-delete" onClick={() => handleRemoveWishlist(item.id, item.name)}>Remove</button>
-                    </div>
+                  ))}
+                </div>
+                {wishlistItems.length > 5 && (
+                  <div className="carousel-controls">
+                    <button 
+                      className="carousel-btn" 
+                      onClick={() => setWishlistSlide(Math.max(0, wishlistSlide - 1))}
+                      disabled={wishlistSlide === 0}
+                    >
+                      ◀
+                    </button>
+                    <span className="carousel-counter">{wishlistSlide + 1} / {Math.ceil(wishlistItems.length / 5)}</span>
+                    <button 
+                      className="carousel-btn"
+                      onClick={() => setWishlistSlide(Math.min(wishlistItems.length - 5, wishlistSlide + 1))}
+                      disabled={wishlistSlide >= wishlistItems.length - 5}
+                    >
+                      ▶
+                    </button>
                   </div>
-                ))}
+                )}
               </div>
             )}
           </div>
@@ -256,9 +281,14 @@ export default function ProfilePage() {
           <div className="profile-card profile-center">
             <div className="profile-card-header">
               <h2>{t('profile.accountInfo')}</h2>
-              {!isEditing && (
-                <button className="btn-secondary" onClick={handleStartEdit}>{t('common.edit')}</button>
-              )}
+              <div style={{display: 'flex', gap: '8px'}}>
+                {!isEditing && (
+                  <button className="btn-secondary" onClick={handleStartEdit}>{t('common.edit')}</button>
+                )}
+                <button className="btn-secondary" onClick={() => setShowAddressModal(!showAddressModal)}>
+                  📍 {t('profile.savedAddresses')}
+                </button>
+              </div>
             </div>
             {saveMessage && <div className="success">{t('profile.profileUpdatedSuccessfully')}</div>}
             {isEditing ? (
@@ -300,6 +330,106 @@ export default function ProfilePage() {
                 </div>
               </>
             )}
+
+            {/* Address Modal - Collapsible */}
+            {showAddressModal && (
+              <div className="address-modal">
+                <div className="address-modal-header">
+                  <h3>{t('profile.savedAddresses')}</h3>
+                  <button className="close-btn" onClick={() => {
+                    setShowAddressModal(false);
+                    setEditingAddress(null);
+                  }}>✕</button>
+                </div>
+                
+                {!editingAddress && (
+                  <button className="btn-primary" style={{marginBottom: '16px', width: '100%'}} onClick={() => setEditingAddress({})} >
+                    + {t('profile.addAddress')}
+                  </button>
+                )}
+
+                {editingAddress !== null && (
+                  <form className="address-form" onSubmit={async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(e.currentTarget);
+                    const data = {
+                      userId: user!.id,
+                      label: formData.get('label') as string,
+                      fullName: formData.get('fullName') as string,
+                      street: formData.get('street') as string,
+                      city: formData.get('city') as string,
+                      state: formData.get('state') as string,
+                      zipCode: formData.get('zipCode') as string,
+                      country: formData.get('country') as string || 'USA',
+                      isDefault: formData.get('isDefault') === 'on',
+                    };
+                    try {
+                      if (editingAddress.id) {
+                        await api.updateAddress(editingAddress.id, data);
+                      } else {
+                        await api.createAddress(data);
+                      }
+                      const updated = await api.getAddresses(user!.id);
+                      setAddresses(updated);
+                      setEditingAddress(null);
+                    } catch (err) {
+                      showToast(t('profile.failedToSaveAddress'), 'error');
+                    }
+                  }}>
+                    <input name="label" placeholder={t('profile.labelPlaceholder')} defaultValue={editingAddress?.label} required />
+                    <input name="fullName" placeholder={t('profile.fullName')} defaultValue={editingAddress?.fullName} required />
+                    <input name="street" placeholder={t('profile.streetAddress')} defaultValue={editingAddress?.street} required />
+                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px'}}>
+                      <input name="city" placeholder={t('profile.city')} defaultValue={editingAddress?.city} required />
+                      <input name="state" placeholder={t('profile.state')} defaultValue={editingAddress?.state} required />
+                    </div>
+                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px'}}>
+                      <input name="zipCode" placeholder={t('profile.zipCode')} defaultValue={editingAddress?.zipCode} required />
+                      <input name="country" placeholder={t('profile.country')} defaultValue={editingAddress?.country || 'USA'} />
+                    </div>
+                    <label style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                      <input type="checkbox" name="isDefault" defaultChecked={editingAddress?.isDefault} />
+                      {t('profile.setAsDefault')}
+                    </label>
+                    <div style={{display: 'flex', gap: '8px'}}>
+                      <button type="submit" className="btn-primary" style={{flex: 1}}>{editingAddress.id ? t('profile.updateAddress') : t('profile.saveAddress')}</button>
+                      <button type="button" className="btn-secondary" style={{flex: 1}} onClick={() => setEditingAddress(null)}>{t('common.cancel')}</button>
+                    </div>
+                  </form>
+                )}
+
+                {addresses.length === 0 ? (
+                  <p className="muted" style={{textAlign: 'center', padding: '20px'}}>{t('profile.noAddresses')}</p>
+                ) : (
+                  <div className="addresses-modal-list">
+                    {addresses.map((addr) => (
+                      <div key={addr.id} className={`address-modal-item ${addr.isDefault ? 'default' : ''}`}>
+                        <div className="address-modal-content">
+                          <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px'}}>
+                            <strong>{addr.label}</strong>
+                            {addr.isDefault && <span className="default-badge">{t('profile.defaultAddress')}</span>}
+                          </div>
+                          <div style={{fontSize: '0.9em', color: 'var(--text-secondary)', lineHeight: '1.4'}}>
+                            <div>{addr.fullName}</div>
+                            <div>{addr.street}</div>
+                            <div>{addr.city}, {addr.state} {addr.zipCode}</div>
+                            <div>{addr.country}</div>
+                          </div>
+                        </div>
+                        <div style={{display: 'flex', gap: '6px'}}>
+                          <button className="btn-sm" onClick={() => setEditingAddress(addr)}>{t('common.edit')}</button>
+                          <button className="btn-sm danger" onClick={async () => {
+                            await api.deleteAddress(addr.id);
+                            const updated = await api.getAddresses(user!.id);
+                            setAddresses(updated);
+                          }}>{t('common.delete')}</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* RIGHT: Recently Viewed */}
@@ -308,110 +438,48 @@ export default function ProfilePage() {
             {recentlyViewed.length === 0 ? (
               <p className="muted">{t('profile.noRecentlyViewed')}</p>
             ) : (
-              <div className="profile-product-list">
-                {recentlyViewed.map((item: any) => (
-                  <div key={item.id} className="profile-product-mini">
-                    <div className="profile-product-mini-img" onClick={() => navigate(`/shop/product/${item.id}`)}>
-                      {item.image ? (
-                        <img src={getProductImageUrl(item.image)} alt={item.name} loading="lazy" />
-                      ) : (
-                        <div className="profile-product-placeholder-mini">{item.name}</div>
-                      )}
+              <div className="profile-carousel">
+                <div className="carousel-track" style={{ transform: `translateX(calc(-${recentlyViewedSlide * 100}% / ${Math.min(recentlyViewed.length, 5)}))` }}>
+                  {recentlyViewed.map((item: any) => (
+                    <div key={item.id} className="carousel-item">
+                      <div className="profile-product-mini">
+                        <div className="profile-product-mini-img" onClick={() => navigate(`/shop/product/${item.id}`)}>
+                          {item.image ? (
+                            <img src={getProductImageUrl(item.image)} alt={item.name} loading="lazy" />
+                          ) : (
+                            <div className="profile-product-placeholder-mini">{item.name}</div>
+                          )}
+                        </div>
+                        <div className="profile-product-mini-info">
+                          <strong onClick={() => navigate(`/shop/product/${item.id}`)} style={{cursor: 'pointer'}}>{item.name}</strong>
+                          <div className="muted">${Number(item.price).toFixed(2)}</div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="profile-product-mini-info">
-                      <strong onClick={() => navigate(`/shop/product/${item.id}`)} style={{cursor: 'pointer'}}>{item.name}</strong>
-                      <div className="muted">${Number(item.price).toFixed(2)}</div>
-                    </div>
+                  ))}
+                </div>
+                {recentlyViewed.length > 5 && (
+                  <div className="carousel-controls">
+                    <button 
+                      className="carousel-btn"
+                      onClick={() => setRecentlyViewedSlide(Math.max(0, recentlyViewedSlide - 1))}
+                      disabled={recentlyViewedSlide === 0}
+                    >
+                      ◀
+                    </button>
+                    <span className="carousel-counter">{recentlyViewedSlide + 1} / {Math.ceil(recentlyViewed.length / 5)}</span>
+                    <button 
+                      className="carousel-btn"
+                      onClick={() => setRecentlyViewedSlide(Math.min(recentlyViewed.length - 5, recentlyViewedSlide + 1))}
+                      disabled={recentlyViewedSlide >= recentlyViewed.length - 5}
+                    >
+                      ▶
+                    </button>
                   </div>
-                ))}
+                )}
               </div>
             )}
           </div>
-        </div>
-
-        {/* FULL WIDTH: Addresses */}
-        <div className="profile-card profile-addresses">
-          <div className="profile-card-header">
-            <h2>{t('profile.savedAddresses')}</h2>
-            <button className="btn-secondary" onClick={() => { setEditingAddress(null); setShowAddressForm(!showAddressForm); }}>
-              {showAddressForm ? t('common.cancel') : `+ ${t('profile.addAddress')}`}
-            </button>
-          </div>
-          {showAddressForm && (
-            <form className="address-form" onSubmit={async (e) => {
-              e.preventDefault();
-              const formData = new FormData(e.currentTarget);
-              const data = {
-                userId: user!.id,
-                label: formData.get('label') as string,
-                fullName: formData.get('fullName') as string,
-                street: formData.get('street') as string,
-                city: formData.get('city') as string,
-                state: formData.get('state') as string,
-                zipCode: formData.get('zipCode') as string,
-                country: formData.get('country') as string || 'USA',
-                isDefault: formData.get('isDefault') === 'on',
-              };
-              try {
-                if (editingAddress) {
-                  await api.updateAddress(editingAddress.id, data);
-                } else {
-                  await api.createAddress(data);
-                }
-                const updated = await api.getAddresses(user!.id);
-                setAddresses(updated);
-                setShowAddressForm(false);
-                setEditingAddress(null);
-              } catch (err) {
-                showToast(t('profile.failedToSaveAddress'), 'error');
-              }
-            }}>
-              <input name="label" placeholder={t('profile.labelPlaceholder')} defaultValue={editingAddress?.label} required />
-              <input name="fullName" placeholder={t('profile.fullName')} defaultValue={editingAddress?.fullName} required />
-              <input name="street" placeholder={t('profile.streetAddress')} defaultValue={editingAddress?.street} required />
-              <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px'}}>
-                <input name="city" placeholder={t('profile.city')} defaultValue={editingAddress?.city} required />
-                <input name="state" placeholder={t('profile.state')} defaultValue={editingAddress?.state} required />
-              </div>
-              <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px'}}>
-                <input name="zipCode" placeholder={t('profile.zipCode')} defaultValue={editingAddress?.zipCode} required />
-                <input name="country" placeholder={t('profile.country')} defaultValue={editingAddress?.country || 'USA'} />
-              </div>
-              <label style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
-                <input type="checkbox" name="isDefault" defaultChecked={editingAddress?.isDefault} />
-                {t('profile.setAsDefault')}
-              </label>
-              <button type="submit" className="btn-primary">{editingAddress ? t('profile.updateAddress') : t('profile.saveAddress')}</button>
-            </form>
-          )}
-          {addresses.length === 0 ? (
-            <p className="muted">{t('profile.noAddresses')}</p>
-          ) : (
-            <div className="addresses-grid">
-              {addresses.map((addr) => (
-                <div key={addr.id} className={`address-item ${addr.isDefault ? 'default' : ''}`}>
-                  <div className="address-content">
-                    <div className="address-header">
-                      <strong>{addr.label}</strong>
-                      {addr.isDefault && <span className="default-badge">{t('profile.defaultAddress')}</span>}
-                    </div>
-                    <div>{addr.fullName}</div>
-                    <div>{addr.street}</div>
-                    <div>{addr.city}, {addr.state} {addr.zipCode}</div>
-                    <div>{addr.country}</div>
-                  </div>
-                  <div className="address-actions">
-                    <button onClick={() => { setEditingAddress(addr); setShowAddressForm(true); }}>{t('common.edit')}</button>
-                    <button onClick={async () => {
-                      await api.deleteAddress(addr.id);
-                      const updated = await api.getAddresses(user!.id);
-                      setAddresses(updated);
-                    }}>{t('common.delete')}</button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
 
         {/* FOOTER: Actions */}

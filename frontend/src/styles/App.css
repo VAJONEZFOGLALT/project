@@ -2350,6 +2350,7 @@ tfoot tr { border-top: 2px solid var(--border); font-weight: 700; background: va
   grid-template-columns: 1fr 1.2fr 1fr;
   gap: 28px; 
   margin-bottom: 40px;
+  align-items: start;
 }
 
 .profile-main { 
@@ -2475,7 +2476,7 @@ tfoot tr { border-top: 2px solid var(--border); font-weight: 700; background: va
   display: flex;
   flex-direction: column;
   gap: 12px;
-  max-height: 300px;
+  max-height: 360px;
   overflow-y: auto;
   padding-right: 8px;
 }
@@ -2703,6 +2704,12 @@ tfoot tr { border-top: 2px solid var(--border); font-weight: 700; background: va
   animation: slideIn 0.2s ease;
 }
 
+.address-modal-dialog {
+  max-width: 760px;
+  width: 100%;
+  padding: 20px;
+}
+
 @keyframes slideIn {
   from {
     opacity: 0;
@@ -2753,6 +2760,16 @@ tfoot tr { border-top: 2px solid var(--border); font-weight: 700; background: va
   flex-direction: column;
   gap: 12px;
   margin-top: 16px;
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.courier-picker-box {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  background: var(--surface-hover);
 }
 
 .address-modal-item {
@@ -3625,11 +3642,6 @@ tfoot tr { border-top: 2px solid var(--border); font-weight: 700; background: va
     font-size: 1.4em;
   }
 }
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
-}
 
 .checkout-item-price span {
   font-size: 1.1em;
@@ -3757,8 +3769,6 @@ tfoot tr { border-top: 2px solid var(--border); font-weight: 700; background: va
 .btn-block:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-}
-  background: var(--primary-light);
 }
 
 .address-option input[type="radio"] {

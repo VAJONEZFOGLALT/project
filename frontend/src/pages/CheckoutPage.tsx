@@ -134,29 +134,30 @@ export default function CheckoutPage({ onSuccess }: { onSuccess?: (id: number) =
                   <input placeholder={t('auth.password')} type="password" value={newUser.password} onChange={e => setNewUser({...newUser, password: e.target.value})} style={{ width: '100%', padding: '8px' }} required />
                 </div>
               )}
-
-              <div className="checkout-sidebar">
-                <h3>{t('checkout.summary')}</h3>
-                <div style={{ padding: '20px 0' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span>{t('checkout.subtotal')}</span>
-                    <span>${total.toFixed(2)}</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px solid var(--border)' }}>
-                    <span>{t('checkout.shipping')}</span>
-                    <span>${ship.toFixed(2)}</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.2em', fontWeight: 'bold' }}>
-                    <span>{t('checkout.total')}</span>
-                    <span>${finalTotal.toFixed(2)}</span>
-                  </div>
-                </div>
-                <button className="btn-primary btn-block" onClick={handleOrder} disabled={loading || items.length === 0}>
-                  {loading ? t('checkout.processing') : t('checkout.placeOrder')}
-                </button>
-              </div>
             </>
           )}
+        </div>
+
+        <div className="checkout-sidebar">
+          <h3>{t('checkout.summary')}</h3>
+          <div style={{ padding: '20px 0' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <span>{t('checkout.subtotal')}</span>
+              <span>${total.toFixed(2)}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px solid var(--border)' }}>
+              <span>{t('checkout.shipping')}</span>
+              <span>${ship.toFixed(2)}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.2em', fontWeight: 'bold' }}>
+              <span>{t('checkout.total')}</span>
+              <span>${finalTotal.toFixed(2)}</span>
+            </div>
+          </div>
+          <button className="btn-primary btn-block" onClick={handleOrder} disabled={loading || items.length === 0}>
+            {loading ? t('checkout.processing') : t('checkout.placeOrder')}
+          </button>
+        </div>
       </div>
     </div>
   );

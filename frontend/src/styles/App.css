@@ -3098,6 +3098,38 @@ tfoot tr { border-top: 2px solid var(--border); font-weight: 700; background: va
   letter-spacing: -0.5px;
 }
 
+.empty-checkout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  background: var(--surface);
+  border: 2px dashed var(--border);
+  border-radius: 16px;
+  min-height: 400px;
+}
+
+.empty-checkout .empty-state {
+  text-align: center;
+}
+
+.empty-checkout .empty-state p:first-child {
+  font-size: 4em;
+  margin: 0 0 16px 0;
+  line-height: 1;
+}
+
+.empty-checkout .empty-state h3 {
+  font-size: 1.4em;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: var(--text);
+}
+
+.empty-checkout .empty-state button {
+  margin-top: 24px;
+}
+
 .checkout-section {
   background: linear-gradient(135deg, var(--surface) 0%, var(--surface-hover) 100%);
   border: 2px solid var(--border);

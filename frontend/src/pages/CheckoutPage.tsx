@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
+import { CourierSelectionModal } from '../components/checkout/CourierSelectionModal';
 
 const couriers = [
   { id: 'MAGYAR_POSTA', name: '🇭🇺 Magyar Posta', price: 2.99, days: '2-3 days', type: 'address' },
@@ -19,6 +20,8 @@ export default function CheckoutPage({ onSuccess }: { onSuccess?: (id: number) =
   const { user } = useAuth();
   const navigate = useNavigate();
   const [courier, setCourier] = useState('UPS');
+  const [courierLocation, setCourierLocation] = useState('');
+  const [showCourierModal, setShowCourierModal] = useState(false);
   const [addresses, setAddresses] = useState<any[]>([]);
   const [selectedAddr, setSelectedAddr] = useState<number | null>(null);
   const [newUser, setNewUser] = useState({ username: '', email: '', password: '' });
@@ -100,15 +103,19 @@ export default function CheckoutPage({ onSuccess }: { onSuccess?: (id: number) =
 
               <div className="checkout-section">
                 <h3>{t('checkout.delivery')}</h3>
-                {couriers.map(c => (
-                  <label key={c.id} style={{ display: 'flex', gap: '10px', margin: '10px 0', padding: '10px', border: '1px solid var(--border)', borderRadius: '6px' }}>
-                    <input type="radio" value={c.id} checked={courier === c.id} onChange={e => setCourier(e.target.value)} />
-                    <div style={{ flex: 1 }}>
-                      <div><strong>{c.name}</strong> - ${c.price.toFixed(2)}</div>
-                      <div className="muted" style={{ fontSize: '0.9em' }}>{c.days}</div>
-                    </div>
-                  </label>
-                ))}
+                <div className="courier-selected-info">
+                  <div className="courier-display">
+                    <strong>{couriers.find(c => c.id === courier)?.name}</strong>
+                    <p className="muted">${couriers.find(c => c.id === courier)?.price.toFixed(2)}</p>
+                    {courierLocation && <p className="muted" style={{ fontSize: '0.85em' }}>📍 {courierLocation}</p>}
+                  </div>
+                  <button 
+                    className="btn-secondary" 
+                    onClick={() => setShowCourierModal(true)}
+                  >
+                    {t('common.change')}
+                  </button>
+                </div>
               </div>
 
               {user && addresses.length > 0 && (
@@ -159,6 +166,18 @@ export default function CheckoutPage({ onSuccess }: { onSuccess?: (id: number) =
           </button>
         </div>
       </div>
+
+      {/* Courier Selection Modal */}
+      <CourierSelectionModal
+        isOpen={showCourierModal}
+        onClose={() => setShowCourierModal(false)}
+        couriers={couriers}
+        selectedCourier={courier}
+        onSelect={(courierId, location) => {
+          setCourier(courierId);
+          setCourierLocation(location || '');
+        }}
+      />
     </div>
   );
 }

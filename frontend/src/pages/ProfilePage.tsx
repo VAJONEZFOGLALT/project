@@ -189,11 +189,71 @@ export default function ProfilePage() {
             <h1>{displayName}</h1>
             <p className="profile-role">{roleLabel}</p>
           </div>
+          
+          <div className="profile-header-stats">
+            <div className="header-stat">
+              <span className="header-stat-icon">📦</span>
+              <div>
+                <div className="header-stat-value">{orderCount}</div>
+                <div className="header-stat-label">{t('profile.totalOrders')}</div>
+              </div>
+            </div>
+            <div className="header-stat">
+              <span className="header-stat-icon">💰</span>
+              <div>
+                <div className="header-stat-value">${totalSpent.toFixed(2)}</div>
+                <div className="header-stat-label">{t('profile.totalSpent')}</div>
+              </div>
+            </div>
+            <div className="header-stat">
+              <span className="header-stat-icon">❤️</span>
+              <div>
+                <div className="header-stat-value">{wishlistItems.length}</div>
+                <div className="header-stat-label">{t('profile.wishlistItems')}</div>
+              </div>
+            </div>
+            <div className="header-stat">
+              <span className="header-stat-icon">👁️</span>
+              <div>
+                <div className="header-stat-value">{recentlyViewed.length}</div>
+                <div className="header-stat-label">{t('profile.recentlyViewedCount')}</div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="profile-content">
-          <div className="profile-main">
-          <div className="profile-card">
+          {/* LEFT: Wishlist */}
+          <div className="profile-card profile-left">
+            <h2>{t('profile.wishlist')}</h2>
+            {loadingProducts ? (
+              <p className="muted">{t('profile.loadingWishlist')}</p>
+            ) : wishlistItems.length === 0 ? (
+              <p className="muted">{t('profile.emptyWishlist')}</p>
+            ) : (
+              <div className="profile-product-list">
+                {wishlistItems.map((item) => (
+                  <div key={item.id} className="profile-product-mini">
+                    <div className="profile-product-mini-img" onClick={() => navigate(`/shop/product/${item.id}`)}>
+                      {item.image ? (
+                        <img src={getProductImageUrl(item.image)} alt={item.name} loading="lazy" />
+                      ) : (
+                        <div className="profile-product-placeholder-mini">{item.name}</div>
+                      )}
+                    </div>
+                    <div className="profile-product-mini-info">
+                      <strong onClick={() => navigate(`/shop/product/${item.id}`)} style={{cursor: 'pointer'}}>{item.name}</strong>
+                      <div className="muted">${Number(item.price).toFixed(2)}</div>
+                      <button className="btn-delete" onClick={() => handleRemoveWishlist(item.id, item.name)}>Remove</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* CENTER: Account Info */}
+          <div className="profile-card profile-center">
             <div className="profile-card-header">
               <h2>{t('profile.accountInfo')}</h2>
               {!isEditing && (
@@ -222,231 +282,142 @@ export default function ProfilePage() {
               </form>
             ) : (
               <>
-            <div className="profile-field">
-              <label>{t('profile.username')}</label>
-              <div className="profile-value">{user.username}</div>
-            </div>
-            <div className="profile-field">
-              <label>{t('profile.email')}</label>
-              <div className="profile-value">{user.email}</div>
-            </div>
-            <div className="profile-field">
-              <label>{t('profile.fullName')}</label>
-              <div className="profile-value">{user.name || '—'}</div>
-            </div>
-            <div className="profile-field">
-              <label>{t('profile.accountType')}</label>
-              <div className="profile-value">{accountTypeLabel}</div>
-            </div>
+                <div className="profile-field">
+                  <label>{t('profile.username')}</label>
+                  <div className="profile-value">{user.username}</div>
+                </div>
+                <div className="profile-field">
+                  <label>{t('profile.email')}</label>
+                  <div className="profile-value">{user.email}</div>
+                </div>
+                <div className="profile-field">
+                  <label>{t('profile.fullName')}</label>
+                  <div className="profile-value">{user.name || '—'}</div>
+                </div>
+                <div className="profile-field">
+                  <label>{t('profile.accountType')}</label>
+                  <div className="profile-value">{accountTypeLabel}</div>
+                </div>
               </>
             )}
           </div>
 
-          <div className="profile-card">
-            <h2>{t('profile.wishlist')}</h2>
-            {loadingProducts ? (
-              <p className="muted">{t('profile.loadingWishlist')}</p>
-            ) : wishlistItems.length === 0 ? (
-              <p className="muted">{t('profile.emptyWishlist')}</p>
-            ) : (
-              <div className="profile-grid">
-                {wishlistItems.map((item) => (
-                  <div key={item.id} className="profile-product">
-                    <div className="profile-product-info" onClick={() => navigate(`/shop/product/${item.id}`)}>
-                      {item.image ? (
-                        <img src={getProductImageUrl(item.image)} alt={item.name} loading="lazy" />
-                      ) : (
-                        <div className="profile-product-placeholder">{item.name}</div>
-                      )}
-                      <div>
-                        <strong>{item.name}</strong>
-                        <div className="muted">${Number(item.price).toFixed(2)}</div>
-                      </div>
-                    </div>
-                    <button className="btn-secondary" onClick={() => handleRemoveWishlist(item.id, item.name)}>{t('common.delete')}</button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="profile-card">
+          {/* RIGHT: Recently Viewed */}
+          <div className="profile-card profile-right">
             <h2>{t('profile.recentlyViewed')}</h2>
             {recentlyViewed.length === 0 ? (
               <p className="muted">{t('profile.noRecentlyViewed')}</p>
             ) : (
-              <div className="profile-grid">
+              <div className="profile-product-list">
                 {recentlyViewed.map((item: any) => (
-                  <div key={item.id} className="profile-product" onClick={() => navigate(`/shop/product/${item.id}`)}>
-                    <div className="profile-product-info">
+                  <div key={item.id} className="profile-product-mini">
+                    <div className="profile-product-mini-img" onClick={() => navigate(`/shop/product/${item.id}`)}>
                       {item.image ? (
                         <img src={getProductImageUrl(item.image)} alt={item.name} loading="lazy" />
                       ) : (
-                        <div className="profile-product-placeholder">{item.name}</div>
+                        <div className="profile-product-placeholder-mini">{item.name}</div>
                       )}
-                      <div>
-                        <strong>{item.name}</strong>
-                        <div className="muted">${Number(item.price).toFixed(2)}</div>
-                      </div>
+                    </div>
+                    <div className="profile-product-mini-info">
+                      <strong onClick={() => navigate(`/shop/product/${item.id}`)} style={{cursor: 'pointer'}}>{item.name}</strong>
+                      <div className="muted">${Number(item.price).toFixed(2)}</div>
                     </div>
                   </div>
                 ))}
               </div>
             )}
-          </div>
-
-          <div className="profile-card">
-            <div className="profile-card-header">
-              <h2>{t('profile.savedAddresses')}</h2>
-              <button className="btn-secondary" onClick={() => { setEditingAddress(null); setShowAddressForm(!showAddressForm); }}>
-                {showAddressForm ? t('common.cancel') : `+ ${t('profile.addAddress')}`}
-              </button>
-            </div>
-            {showAddressForm && (
-              <form className="address-form" onSubmit={async (e) => {
-                e.preventDefault();
-                const formData = new FormData(e.currentTarget);
-                const data = {
-                  userId: user!.id,
-                  label: formData.get('label') as string,
-                  fullName: formData.get('fullName') as string,
-                  street: formData.get('street') as string,
-                  city: formData.get('city') as string,
-                  state: formData.get('state') as string,
-                  zipCode: formData.get('zipCode') as string,
-                  country: formData.get('country') as string || 'USA',
-                  isDefault: formData.get('isDefault') === 'on',
-                };
-                try {
-                  if (editingAddress) {
-                    await api.updateAddress(editingAddress.id, data);
-                  } else {
-                    await api.createAddress(data);
-                  }
-                  const updated = await api.getAddresses(user!.id);
-                  setAddresses(updated);
-                  setShowAddressForm(false);
-                  setEditingAddress(null);
-                } catch (err) {
-                  showToast(t('profile.failedToSaveAddress'), 'error');
-                }
-              }}>
-                <input name="label" placeholder={t('profile.labelPlaceholder')} defaultValue={editingAddress?.label} required />
-                <input name="fullName" placeholder={t('profile.fullName')} defaultValue={editingAddress?.fullName} required />
-                <input name="street" placeholder={t('profile.streetAddress')} defaultValue={editingAddress?.street} required />
-                <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px'}}>
-                  <input name="city" placeholder={t('profile.city')} defaultValue={editingAddress?.city} required />
-                  <input name="state" placeholder={t('profile.state')} defaultValue={editingAddress?.state} required />
-                </div>
-                <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px'}}>
-                  <input name="zipCode" placeholder={t('profile.zipCode')} defaultValue={editingAddress?.zipCode} required />
-                  <input name="country" placeholder={t('profile.country')} defaultValue={editingAddress?.country || 'USA'} />
-                </div>
-                <label style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
-                  <input type="checkbox" name="isDefault" defaultChecked={editingAddress?.isDefault} />
-                  {t('profile.setAsDefault')}
-                </label>
-                <button type="submit" className="btn-primary">{editingAddress ? t('profile.updateAddress') : t('profile.saveAddress')}</button>
-              </form>
-            )}
-            {addresses.length === 0 ? (
-              <p className="muted">{t('profile.noAddresses')}</p>
-            ) : (
-              <div className="addresses-list">
-                {addresses.map((addr) => (
-                  <div key={addr.id} className={`address-item ${addr.isDefault ? 'default' : ''}`}>
-                    <div className="address-content">
-                      <div className="address-header">
-                        <strong>{addr.label}</strong>
-                        {addr.isDefault && <span className="default-badge">{t('profile.defaultAddress')}</span>}
-                      </div>
-                      <div>{addr.fullName}</div>
-                      <div>{addr.street}</div>
-                      <div>{addr.city}, {addr.state} {addr.zipCode}</div>
-                      <div>{addr.country}</div>
-                    </div>
-                    <div className="address-actions">
-                      <button onClick={() => { setEditingAddress(addr); setShowAddressForm(true); }}>{t('common.edit')}</button>
-                      <button onClick={async () => {
-                        await api.deleteAddress(addr.id);
-                        const updated = await api.getAddresses(user!.id);
-                        setAddresses(updated);
-                      }}>{t('common.delete')}</button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="profile-actions">
-            <Link to="/shop/orders" className="btn-primary">{t('profile.viewMyOrders')}</Link>
-            <Link to="/shop/all" className="btn-secondary">{t('profile.continueShopping')}</Link>
           </div>
         </div>
 
-          <div className="profile-sidebar">
-            <div className="profile-card">
-              <h2>{t('profile.quickStats')}</h2>
-              <div className="stats-grid">
-                <div className="stat-item">
-                  <div className="stat-icon">📦</div>
-                  <div className="stat-info">
-                    <div className="stat-value">{orderCount}</div>
-                    <div className="stat-label">{t('profile.totalOrders')}</div>
-                  </div>
-                </div>
-                <div className="stat-item">
-                  <div className="stat-icon">💰</div>
-                  <div className="stat-info">
-                    <div className="stat-value">${totalSpent.toFixed(2)}</div>
-                    <div className="stat-label">{t('profile.totalSpent')}</div>
-                  </div>
-                </div>
-                <div className="stat-item">
-                  <div className="stat-icon">❤️</div>
-                  <div className="stat-info">
-                    <div className="stat-value">{wishlistItems.length}</div>
-                    <div className="stat-label">{t('profile.wishlistItems')}</div>
-                  </div>
-                </div>
-                <div className="stat-item">
-                  <div className="stat-icon">👁️</div>
-                  <div className="stat-info">
-                    <div className="stat-value">{recentlyViewed.length}</div>
-                    <div className="stat-label">{t('profile.recentlyViewedCount')}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="profile-card">
-              <h2>{t('profile.quickLinks')}</h2>
-              <div className="quick-links">
-                <Link to="/shop/orders" className="quick-link">
-                  <span className="quick-link-icon">📋</span>
-                  <div>
-                    <div className="quick-link-title">{t('profile.myOrders')}</div>
-                    <div className="quick-link-desc">{t('profile.trackPurchases')}</div>
-                  </div>
-                </Link>
-                <Link to="/shop/all" className="quick-link">
-                  <span className="quick-link-icon">🛍️</span>
-                  <div>
-                    <div className="quick-link-title">{t('profile.shop')}</div>
-                    <div className="quick-link-desc">{t('profile.browseProducts')}</div>
-                  </div>
-                </Link>
-                <Link to="/shop/checkout" className="quick-link">
-                  <span className="quick-link-icon">🛒</span>
-                  <div>
-                    <div className="quick-link-title">{t('profile.cart')}</div>
-                    <div className="quick-link-desc">{t('profile.viewCart')}</div>
-                  </div>
-                </Link>
-              </div>
-            </div>
+        {/* FULL WIDTH: Addresses */}
+        <div className="profile-card profile-addresses">
+          <div className="profile-card-header">
+            <h2>{t('profile.savedAddresses')}</h2>
+            <button className="btn-secondary" onClick={() => { setEditingAddress(null); setShowAddressForm(!showAddressForm); }}>
+              {showAddressForm ? t('common.cancel') : `+ ${t('profile.addAddress')}`}
+            </button>
           </div>
+          {showAddressForm && (
+            <form className="address-form" onSubmit={async (e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              const data = {
+                userId: user!.id,
+                label: formData.get('label') as string,
+                fullName: formData.get('fullName') as string,
+                street: formData.get('street') as string,
+                city: formData.get('city') as string,
+                state: formData.get('state') as string,
+                zipCode: formData.get('zipCode') as string,
+                country: formData.get('country') as string || 'USA',
+                isDefault: formData.get('isDefault') === 'on',
+              };
+              try {
+                if (editingAddress) {
+                  await api.updateAddress(editingAddress.id, data);
+                } else {
+                  await api.createAddress(data);
+                }
+                const updated = await api.getAddresses(user!.id);
+                setAddresses(updated);
+                setShowAddressForm(false);
+                setEditingAddress(null);
+              } catch (err) {
+                showToast(t('profile.failedToSaveAddress'), 'error');
+              }
+            }}>
+              <input name="label" placeholder={t('profile.labelPlaceholder')} defaultValue={editingAddress?.label} required />
+              <input name="fullName" placeholder={t('profile.fullName')} defaultValue={editingAddress?.fullName} required />
+              <input name="street" placeholder={t('profile.streetAddress')} defaultValue={editingAddress?.street} required />
+              <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px'}}>
+                <input name="city" placeholder={t('profile.city')} defaultValue={editingAddress?.city} required />
+                <input name="state" placeholder={t('profile.state')} defaultValue={editingAddress?.state} required />
+              </div>
+              <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px'}}>
+                <input name="zipCode" placeholder={t('profile.zipCode')} defaultValue={editingAddress?.zipCode} required />
+                <input name="country" placeholder={t('profile.country')} defaultValue={editingAddress?.country || 'USA'} />
+              </div>
+              <label style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                <input type="checkbox" name="isDefault" defaultChecked={editingAddress?.isDefault} />
+                {t('profile.setAsDefault')}
+              </label>
+              <button type="submit" className="btn-primary">{editingAddress ? t('profile.updateAddress') : t('profile.saveAddress')}</button>
+            </form>
+          )}
+          {addresses.length === 0 ? (
+            <p className="muted">{t('profile.noAddresses')}</p>
+          ) : (
+            <div className="addresses-grid">
+              {addresses.map((addr) => (
+                <div key={addr.id} className={`address-item ${addr.isDefault ? 'default' : ''}`}>
+                  <div className="address-content">
+                    <div className="address-header">
+                      <strong>{addr.label}</strong>
+                      {addr.isDefault && <span className="default-badge">{t('profile.defaultAddress')}</span>}
+                    </div>
+                    <div>{addr.fullName}</div>
+                    <div>{addr.street}</div>
+                    <div>{addr.city}, {addr.state} {addr.zipCode}</div>
+                    <div>{addr.country}</div>
+                  </div>
+                  <div className="address-actions">
+                    <button onClick={() => { setEditingAddress(addr); setShowAddressForm(true); }}>{t('common.edit')}</button>
+                    <button onClick={async () => {
+                      await api.deleteAddress(addr.id);
+                      const updated = await api.getAddresses(user!.id);
+                      setAddresses(updated);
+                    }}>{t('common.delete')}</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* FOOTER: Actions */}
+        <div className="profile-actions">
+          <Link to="/shop/orders" className="btn-primary">{t('profile.viewMyOrders')}</Link>
+          <Link to="/shop/all" className="btn-secondary">{t('profile.continueShopping')}</Link>
         </div>
       </div>
     </div>

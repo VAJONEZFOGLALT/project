@@ -85,77 +85,76 @@ export default function CheckoutPage({ onSuccess }: { onSuccess?: (id: number) =
             </div>
           ) : (
             <>
-          <div className="checkout-section">
-            <h3>{t('checkout.items')} ({items.length})</h3>
-              {items.map(it => (
-                <div key={it.productId} className="checkout-item">
-                  <div className="checkout-item-info">
-                    <strong>{it.name}</strong> x {it.quantity}
-                    <span>${(it.price * it.quantity).toFixed(2)}</span>
+              <div className="checkout-section">
+                <h3>{t('checkout.items')} ({items.length})</h3>
+                {items.map(it => (
+                  <div key={it.productId} className="checkout-item">
+                    <div className="checkout-item-info">
+                      <strong>{it.name}</strong> x {it.quantity}
+                      <span>${(it.price * it.quantity).toFixed(2)}</span>
+                    </div>
+                    <button className="btn-text" onClick={() => remove(it.productId)}>{t('checkout.remove')}</button>
                   </div>
-                  <button className="btn-text" onClick={() => remove(it.productId)}>{t('checkout.remove')}</button>
-                </div>
-              ))}
-          </div>
+                ))}
+              </div>
 
-          <div className="checkout-section">
-            <h3>{t('checkout.delivery')}</h3>
-            {couriers.map(c => (
-              <label key={c.id} style={{ display: 'flex', gap: '10px', margin: '10px 0', padding: '10px', border: '1px solid var(--border)', borderRadius: '6px' }}>
-                <input type="radio" value={c.id} checked={courier === c.id} onChange={e => setCourier(e.target.value)} />
-                <div style={{ flex: 1 }}>
-                  <div><strong>{c.name}</strong> - ${c.price.toFixed(2)}</div>
-                  <div className="muted" style={{ fontSize: '0.9em' }}>{c.days}</div>
-                </div>
-              </label>
-            ))}
-          </div>
+              <div className="checkout-section">
+                <h3>{t('checkout.delivery')}</h3>
+                {couriers.map(c => (
+                  <label key={c.id} style={{ display: 'flex', gap: '10px', margin: '10px 0', padding: '10px', border: '1px solid var(--border)', borderRadius: '6px' }}>
+                    <input type="radio" value={c.id} checked={courier === c.id} onChange={e => setCourier(e.target.value)} />
+                    <div style={{ flex: 1 }}>
+                      <div><strong>{c.name}</strong> - ${c.price.toFixed(2)}</div>
+                      <div className="muted" style={{ fontSize: '0.9em' }}>{c.days}</div>
+                    </div>
+                  </label>
+                ))}
+              </div>
 
-          {user && addresses.length > 0 && (
-            <div className="checkout-section">
-              <h3>{t('checkout.address')}</h3>
-              {addresses.map(a => (
-                <label key={a.id} style={{ display: 'flex', gap: '10px', margin: '10px 0', padding: '10px', border: '1px solid var(--border)', borderRadius: '6px' }}>
-                  <input type="radio" checked={selectedAddr === a.id} onChange={() => setSelectedAddr(a.id)} />
-                  <div>
-                    <strong>{a.label}</strong><br />
-                    {a.fullName}, {a.street}, {a.city}, {a.state} {a.zipCode}
+              {user && addresses.length > 0 && (
+                <div className="checkout-section">
+                  <h3>{t('checkout.address')}</h3>
+                  {addresses.map(a => (
+                    <label key={a.id} style={{ display: 'flex', gap: '10px', margin: '10px 0', padding: '10px', border: '1px solid var(--border)', borderRadius: '6px' }}>
+                      <input type="radio" checked={selectedAddr === a.id} onChange={() => setSelectedAddr(a.id)} />
+                      <div>
+                        <strong>{a.label}</strong><br />
+                        {a.fullName}, {a.street}, {a.city}, {a.state} {a.zipCode}
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              )}
+
+              {!user && (
+                <div className="checkout-section">
+                  <h3>{t('checkout.accountInfo')}</h3>
+                  <input placeholder={t('common.username')} value={newUser.username} onChange={e => setNewUser({...newUser, username: e.target.value})} style={{ width: '100%', marginBottom: '8px', padding: '8px' }} required />
+                  <input placeholder={t('auth.email')} type="email" value={newUser.email} onChange={e => setNewUser({...newUser, email: e.target.value})} style={{ width: '100%', marginBottom: '8px', padding: '8px' }} required />
+                  <input placeholder={t('auth.password')} type="password" value={newUser.password} onChange={e => setNewUser({...newUser, password: e.target.value})} style={{ width: '100%', padding: '8px' }} required />
+                </div>
+              )}
+
+              <div className="checkout-sidebar">
+                <h3>{t('checkout.summary')}</h3>
+                <div style={{ padding: '20px 0' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <span>{t('checkout.subtotal')}</span>
+                    <span>${total.toFixed(2)}</span>
                   </div>
-                </label>
-              ))}
-            </div>
-          )}
-
-          {!user && (
-            <div className="checkout-section">
-              <h3>{t('checkout.accountInfo')}</h3>
-              <input placeholder={t('common.username')} value={newUser.username} onChange={e => setNewUser({...newUser, username: e.target.value})} style={{ width: '100%', marginBottom: '8px', padding: '8px' }} required />
-              <input placeholder={t('auth.email')} type="email" value={newUser.email} onChange={e => setNewUser({...newUser, email: e.target.value})} style={{ width: '100%', marginBottom: '8px', padding: '8px' }} required />
-              <input placeholder={t('auth.password')} type="password" value={newUser.password} onChange={e => setNewUser({...newUser, password: e.target.value})} style={{ width: '100%', padding: '8px' }} required />
-            </div>
-          )}
-        </div>
-
-        <div className="checkout-sidebar">
-          <h3>{t('checkout.summary')}</h3>
-          <div style={{ padding: '20px 0' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span>{t('checkout.subtotal')}</span>
-              <span>${total.toFixed(2)}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px solid var(--border)' }}>
-              <span>{t('checkout.shipping')}</span>
-              <span>${ship.toFixed(2)}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.2em', fontWeight: 'bold' }}>
-              <span>{t('checkout.total')}</span>
-              <span>${finalTotal.toFixed(2)}</span>
-            </div>
-          </div>
-          <button className="btn-primary btn-block" onClick={handleOrder} disabled={loading || items.length === 0}>
-            {loading ? t('checkout.processing') : t('checkout.placeOrder')}
-          </button>
-        </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px solid var(--border)' }}>
+                    <span>{t('checkout.shipping')}</span>
+                    <span>${ship.toFixed(2)}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.2em', fontWeight: 'bold' }}>
+                    <span>{t('checkout.total')}</span>
+                    <span>${finalTotal.toFixed(2)}</span>
+                  </div>
+                </div>
+                <button className="btn-primary btn-block" onClick={handleOrder} disabled={loading || items.length === 0}>
+                  {loading ? t('checkout.processing') : t('checkout.placeOrder')}
+                </button>
+              </div>
             </>
           )}
       </div>

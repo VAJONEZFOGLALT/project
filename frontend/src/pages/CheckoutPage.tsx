@@ -4,14 +4,14 @@ import { useTranslation } from 'react-i18next';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
-import { CourierSelectionModal } from '../components/checkout/CourierSelectionModal';
+import { CourierSelectionModal, type CourierOption } from '../components/checkout/CourierSelectionModal';
 
-const couriers = [
-  { id: 'MAGYAR_POSTA', name: '🇭🇺 Magyar Posta', price: 2.99, days: '2-3 days', type: 'address' },
-  { id: 'UPS', name: 'UPS Express', price: 15.99, days: '1-2 days', type: 'address' },
-  { id: 'DPD', name: 'DPD Express', price: 12.99, days: '1-2 days', type: 'address' },
-  { id: 'PACKETA', name: 'Packeta (Z-box)', price: 4.99, days: '2-3 days', type: 'pickup' },
-  { id: 'GLS', name: 'GLS (Box/Pickup)', price: 5.99, days: '2-4 days', type: 'both' },
+const couriers: CourierOption[] = [
+  { id: 'MAGYAR_POSTA', name: '🇭🇺 Magyar Posta', price: 2.99, days: '2-3 days', type: 'address' as const },
+  { id: 'UPS', name: 'UPS Express', price: 15.99, days: '1-2 days', type: 'address' as const },
+  { id: 'DPD', name: 'DPD Express', price: 12.99, days: '1-2 days', type: 'address' as const },
+  { id: 'PACKETA', name: 'Packeta (Z-box)', price: 4.99, days: '2-3 days', type: 'pickup' as const },
+  { id: 'GLS', name: 'GLS (Box/Pickup)', price: 5.99, days: '2-4 days', type: 'both' as const },
 ];
 
 export default function CheckoutPage({ onSuccess }: { onSuccess?: (id: number) => void }) {

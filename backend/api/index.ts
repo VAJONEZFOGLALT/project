@@ -33,6 +33,15 @@ async function bootstrapServer(): Promise<express.Express> {
 
       app.setGlobalPrefix('api');
 
+      // Ensure Swagger UI static asset URLs resolve correctly on Vercel.
+      // Without a trailing slash, browsers resolve "./swagger-ui.css" to "/swagger-ui.css".
+      expressApp.get('/docs', (_req, res) => {
+        res.redirect(308, '/docs/');
+      });
+      expressApp.get('/api/docs', (_req, res) => {
+        res.redirect(308, '/docs/');
+      });
+
       const config = new DocumentBuilder()
         .setTitle('WebShop API')
         .setDescription('Complete API documentation for the WebShop e-commerce platform')

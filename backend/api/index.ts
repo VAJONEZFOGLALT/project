@@ -33,13 +33,12 @@ async function bootstrapServer(): Promise<express.Express> {
 
       app.setGlobalPrefix('api');
 
-      // Ensure Swagger UI static asset URLs resolve correctly on Vercel.
-      // Without a trailing slash, browsers resolve "./swagger-ui.css" to "/swagger-ui.css".
-      expressApp.get('/docs', (_req, res) => {
-        res.redirect(308, '/docs/');
+      // Redirect only exact legacy docs paths to avoid redirect loops.
+      expressApp.get(/^\/docs\/?$/, (_req, res) => {
+        res.redirect(308, '/api/docs/');
       });
-      expressApp.get('/api/docs', (_req, res) => {
-        res.redirect(308, '/docs/');
+      expressApp.get(/^\/api\/docs$/, (_req, res) => {
+        res.redirect(308, '/api/docs/');
       });
 
       const config = new DocumentBuilder()
@@ -58,7 +57,7 @@ async function bootstrapServer(): Promise<express.Express> {
         .build();
 
       const document = SwaggerModule.createDocument(app, config);
-      SwaggerModule.setup('docs', app, document, {
+      SwaggerModule.setup('api/docs', app, document, {
         swaggerOptions: {
           persistAuthorization: true,
         },

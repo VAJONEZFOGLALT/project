@@ -34,6 +34,10 @@ export default function ProfilePage() {
   const accountTypeLabel = user?.role === 'ADMIN' ? t('profile.administrator') : t('profile.customer');
   const displayName = user?.name || user?.username || '';
   const addressButtonText = addresses.length === 0 ? 'Cim megadasa' : 'Cim modositasa';
+  const preferredAddress = useMemo(() => {
+    if (addresses.length === 0) return null;
+    return addresses.find((addr) => addr.isDefault) || addresses[0];
+  }, [addresses]);
 
   useEffect(() => {
     const load = async () => {
@@ -269,49 +273,43 @@ export default function ProfilePage() {
               </div>
             </div>
             {saveMessage && <div className="success">{saveMessage}</div>}
-            {isEditing ? (
-              <form className="profile-edit-form" onSubmit={handleSaveProfile}>
-                <label>
-                  {t('profile.username')}
-                  <input value={usernameInput} onChange={(e) => setUsernameInput(e.target.value)} required />
-                </label>
-                <label>
-                  {t('profile.email')}
-                  <input type="email" value={emailInput} onChange={(e) => setEmailInput(e.target.value)} required />
-                </label>
-                <label>
-                  {t('profile.fullName')}
-                  <input value={nameInput} onChange={(e) => setNameInput(e.target.value)} />
-                </label>
-                <label>
-                  {t('profile.newPassword')}
-                  <input type="password" value={passwordInput} onChange={(e) => setPasswordInput(e.target.value)} placeholder={t('profile.leaveBlank')} />
-                </label>
-                <div className="profile-edit-actions">
-                  <button type="button" className="btn-secondary" onClick={handleCancelEdit}>{t('common.cancel')}</button>
-                  <button type="submit" className="btn-primary">{t('common.save')}</button>
+            <>
+              <div className="profile-field">
+                <label>{t('profile.username')}</label>
+                <div className="profile-value">{user.username}</div>
+              </div>
+              <div className="profile-field">
+                <label>{t('profile.email')}</label>
+                <div className="profile-value">{user.email}</div>
+              </div>
+              <div className="profile-field">
+                <label>{t('profile.fullName')}</label>
+                <div className="profile-value">{user.name || '—'}</div>
+              </div>
+              <div className="profile-field">
+                <label>{t('profile.accountType')}</label>
+                <div className="profile-value">{accountTypeLabel}</div>
+              </div>
+              <div className="profile-field profile-field-address">
+                <label>{t('profile.savedAddresses')}</label>
+                <div className="profile-value">
+                  {preferredAddress ? (
+                    <div className="profile-address-preview">
+                      <div className="profile-address-preview-title">
+                        <strong>{preferredAddress.label}</strong>
+                        {preferredAddress.isDefault && <span className="default-badge">{t('profile.defaultAddress')}</span>}
+                      </div>
+                      <div>{preferredAddress.fullName}</div>
+                      <div>{preferredAddress.street}</div>
+                      <div>{preferredAddress.city}, {preferredAddress.state} {preferredAddress.zipCode}</div>
+                      <div>{preferredAddress.country}</div>
+                    </div>
+                  ) : (
+                    <span className="muted">{t('profile.noAddresses')}</span>
+                  )}
                 </div>
-              </form>
-            ) : (
-              <>
-                <div className="profile-field">
-                  <label>{t('profile.username')}</label>
-                  <div className="profile-value">{user.username}</div>
-                </div>
-                <div className="profile-field">
-                  <label>{t('profile.email')}</label>
-                  <div className="profile-value">{user.email}</div>
-                </div>
-                <div className="profile-field">
-                  <label>{t('profile.fullName')}</label>
-                  <div className="profile-value">{user.name || '—'}</div>
-                </div>
-                <div className="profile-field">
-                  <label>{t('profile.accountType')}</label>
-                  <div className="profile-value">{accountTypeLabel}</div>
-                </div>
-              </>
-            )}
+              </div>
+            </>
           </div>
 
           {/* RIGHT: Recently Viewed */}
@@ -448,6 +446,39 @@ export default function ProfilePage() {
                 ))}
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {isEditing && (
+        <div className="modal-overlay" onClick={handleCancelEdit}>
+          <div className="modal-content profile-edit-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>{t('profile.editAccount')}</h2>
+              <button className="modal-close" onClick={handleCancelEdit}>✕</button>
+            </div>
+            <form className="profile-edit-form modal-body" onSubmit={handleSaveProfile}>
+              <label>
+                {t('profile.username')}
+                <input value={usernameInput} onChange={(e) => setUsernameInput(e.target.value)} required />
+              </label>
+              <label>
+                {t('profile.email')}
+                <input type="email" value={emailInput} onChange={(e) => setEmailInput(e.target.value)} required />
+              </label>
+              <label>
+                {t('profile.fullName')}
+                <input value={nameInput} onChange={(e) => setNameInput(e.target.value)} />
+              </label>
+              <label>
+                {t('profile.newPassword')}
+                <input type="password" value={passwordInput} onChange={(e) => setPasswordInput(e.target.value)} placeholder={t('profile.leaveBlank')} />
+              </label>
+              <div className="profile-edit-actions">
+                <button type="button" className="btn-secondary" onClick={handleCancelEdit}>{t('common.cancel')}</button>
+                <button type="submit" className="btn-primary">{t('common.save')}</button>
+              </div>
+            </form>
           </div>
         </div>
       )}

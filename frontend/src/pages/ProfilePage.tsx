@@ -104,8 +104,6 @@ export default function ProfilePage() {
   const wishlistItems = useMemo(() => {
     return products.filter(p => wishlistIds.includes(p.id));
   }, [products, wishlistIds]);
-  const visibleWishlistItems = useMemo(() => wishlistItems.slice(0, 4), [wishlistItems]);
-  const visibleRecentlyViewed = useMemo(() => recentlyViewed.slice(0, 4), [recentlyViewed]);
 
   const handleStartEdit = () => {
     setIsEditing(true);
@@ -240,7 +238,7 @@ export default function ProfilePage() {
               <p className="muted">{t('profile.emptyWishlist')}</p>
             ) : (
               <div className="profile-product-list">
-                {visibleWishlistItems.map((item) => (
+                {wishlistItems.map((item) => (
                   <div key={item.id} className="profile-product-mini">
                     <div className="profile-product-mini-img" onClick={() => navigate(`/shop/product/${item.id}`)}>
                       {item.image ? (
@@ -323,7 +321,7 @@ export default function ProfilePage() {
               <p className="muted">{t('profile.noRecentlyViewed')}</p>
             ) : (
               <div className="profile-product-list">
-                {visibleRecentlyViewed.map((item: any) => (
+                {recentlyViewed.map((item: any) => (
                   <div key={item.id} className="profile-product-mini">
                     <div className="profile-product-mini-img" onClick={() => navigate(`/shop/product/${item.id}`)}>
                       {item.image ? (

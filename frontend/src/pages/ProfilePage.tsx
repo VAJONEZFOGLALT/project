@@ -350,7 +350,7 @@ export default function ProfilePage() {
                   <strong>{preferredAddress.label}</strong>
                   {preferredAddress.isDefault && <span className="default-badge">{t('profile.defaultAddress')}</span>}
                 </div>
-                <div className="profile-address-line">{preferredAddress.fullName}</div>
+                <div className="profile-address-line address-line-fullname">{preferredAddress.fullName}</div>
                 <div className="profile-address-line">{preferredAddress.street}</div>
                 <div className="profile-address-line">{preferredAddress.city}, {preferredAddress.state} {preferredAddress.zipCode}</div>
                 <div className="profile-address-line">{preferredAddress.country}</div>

@@ -2741,18 +2741,6 @@ tfoot tr { border-top: 2px solid var(--border); font-weight: 700; background: va
   font-size: 0.95em;
 }
 
-.email-note {
-  font-size: 0.85em;
-  color: var(--muted);
-}
-
-.email-domain-note {
-  font-size: 0.8em;
-  color: var(--muted);
-  margin-top: 4px;
-  font-family: 'Monaco', 'Courier New', monospace;
-}
-
 .profile-fullname {
   word-break: break-word;
   overflow-wrap: break-word;

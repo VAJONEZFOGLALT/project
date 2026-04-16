@@ -325,11 +325,8 @@ export default function ProfilePage() {
                 <div className="profile-value">{user.username}</div>
               </div>
               <div className="profile-field">
-                <label>{t('profile.email')} <span className="email-note">(*1)</span></label>
-                <div className="profile-value profile-email">
-                  {formatEmailForDisplay(user.email).user}
-                  <div className="email-domain-note">*1 = {formatEmailForDisplay(user.email).domain}</div>
-                </div>
+                <label>{t('profile.email')} ({formatEmailForDisplay(user.email).domain})</label>
+                <div className="profile-value profile-email">{formatEmailForDisplay(user.email).user}</div>
               </div>
               <div className="profile-field">
                 <label>{t('profile.fullName')}</label>

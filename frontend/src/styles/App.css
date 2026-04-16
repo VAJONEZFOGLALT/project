@@ -2739,10 +2739,6 @@ tfoot tr { border-top: 2px solid var(--border); font-weight: 700; background: va
 .profile-email {
   font-family: 'Monaco', 'Courier New', monospace;
   font-size: 0.95em;
-  overflow-wrap: break-word;
-  word-break: break-word;
-  display: inline-block;
-  max-width: 100%;
 }
 
 .profile-fullname {

@@ -2407,7 +2407,7 @@ tfoot tr { border-top: 2px solid var(--border); font-weight: 700; background: va
 
 .profile-content { 
   display: grid; 
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.05fr) minmax(0, 1.15fr) minmax(0, 1.15fr);
   gap: 28px; 
   margin-bottom: 40px;
   align-items: stretch;
@@ -2748,6 +2748,17 @@ tfoot tr { border-top: 2px solid var(--border); font-weight: 700; background: va
   background: linear-gradient(165deg, var(--surface-hover) 0%, var(--surface) 100%);
 }
 
+.address-modal-current-card {
+  margin-bottom: 16px;
+}
+
+.address-modal-current-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 6px;
+}
+
 .profile-address-preview-title {
   display: flex;
   align-items: center;
@@ -2899,6 +2910,10 @@ tfoot tr { border-top: 2px solid var(--border); font-weight: 700; background: va
 .address-modal-item.default {
   border-color: var(--primary);
   background: var(--primary-light);
+}
+
+.address-modal-item .btn-sm {
+  align-self: flex-end;
 }
 
 .address-modal-content {

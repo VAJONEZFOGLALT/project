@@ -1592,15 +1592,39 @@ tfoot tr { border-top: 2px solid var(--border); font-weight: 700; background: va
   white-space: nowrap;
 }
 
-.compare-nav-btn.has-items {
+.compare-nav-btn:hover:not(:disabled) {
   border-color: var(--primary);
   color: var(--primary);
-  background: var(--primary-light);
+  transform: translateY(-1px);
+}
+
+.compare-nav-btn.has-items {
+  border-color: transparent;
+  color: #ffffff;
+  background: linear-gradient(135deg, #f97316 0%, #ef4444 100%);
+  box-shadow: 0 10px 24px rgba(239, 68, 68, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  animation: compare-nav-pulse 2.2s ease-in-out infinite;
+}
+
+.compare-nav-btn.has-items:hover:not(:disabled) {
+  color: #ffffff;
+  filter: brightness(1.06);
+  box-shadow: 0 14px 28px rgba(249, 115, 22, 0.34), 0 8px 20px rgba(239, 68, 68, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.24);
 }
 
 .compare-nav-btn:disabled {
   opacity: 0.55;
   cursor: not-allowed;
+}
+
+@keyframes compare-nav-pulse {
+  0%,
+  100% {
+    box-shadow: 0 10px 24px rgba(239, 68, 68, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  }
+  50% {
+    box-shadow: 0 14px 30px rgba(249, 115, 22, 0.4), 0 8px 18px rgba(239, 68, 68, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.24);
+  }
 }
 
 /* Category Page Layout */

@@ -7,7 +7,7 @@ import { useWishlist } from '../hooks/useWishlist';
 import { getRecentlyViewed } from '../services/storage';
 import { getAvatarUrl, getProductImageUrl } from '../utils/imageOptimization';
 import { useToast } from '../contexts/ToastContext';
-import { COUNTRY_ADDRESS_GROUPS, COUNTRY_ADDRESS_CONFIGS, DEFAULT_COUNTRY_CODE, getCountryAddressConfig } from '../utils/addressing';
+import { COUNTRY_ADDRESS_GROUPS, DEFAULT_COUNTRY_CODE, getCountryAddressConfig } from '../utils/addressing';
 
 export default function ProfilePage() {
   const { t, i18n } = useTranslation();

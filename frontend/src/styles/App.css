@@ -2252,10 +2252,23 @@ tfoot tr { border-top: 2px solid var(--border); font-weight: 700; background: va
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
+.carousel-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 .carousel-btn:hover {
   background: var(--primary-hover);
   transform: scale(1.1);
   box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+}
+
+.carousel-btn:disabled:hover {
+  background: var(--primary);
+  transform: none;
+  box-shadow: none;
 }
 
 .carousel-btn:active {
@@ -2276,8 +2289,9 @@ tfoot tr { border-top: 2px solid var(--border); font-weight: 700; background: va
 
 .carousel-grid-featured {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(var(--featured-cols, 5), minmax(210px, 240px));
   gap: 16px;
+  justify-content: center;
   align-items: stretch;
 }
 

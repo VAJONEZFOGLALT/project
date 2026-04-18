@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { api } from '../services/api';
 import { COUNTRY_ADDRESS_CONFIGS, DEFAULT_COUNTRY_CODE, formatAddressSingleLine, getCountryAddressConfig } from '../utils/addressing';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 declare global {
   interface Window {
@@ -69,6 +70,7 @@ export default function CheckoutPage({ onSuccess }: { onSuccess?: (id: number) =
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [packetaSelecting, setPacketaSelecting] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
 
   const isDarkThemeActive = () => {
     const attrTheme = document.documentElement.getAttribute('data-theme');
@@ -83,35 +85,95 @@ export default function CheckoutPage({ onSuccess }: { onSuccess?: (id: number) =
   const guestCountryConfig = getCountryAddressConfig(guestAddress.country);
 
   useEffect(() => {
-    if (user) {
-      api.getAddresses(user.id).then((data) => {
-        setAddresses(data);
-        const preferred = data.find((a: any) => a.isDefault) || data[0];
-        setSelectedAddr(preferred?.id ?? null);
-      }).catch(() => {});
-    }
-  }, [user]);
-
-  useEffect(() => {
     setPickupPointLabel('');
     setPickupPointCode('');
   }, [courier]);
 
   useEffect(() => {
-    const existing = document.querySelector('script[data-packeta-widget="1"]') as HTMLScriptElement | null;
-    if (existing) {
-      setPacketaReady(true);
-      return;
-    }
+    let active = true;
 
-    const script = document.createElement('script');
-    script.src = 'https://widget.packeta.com/v6/www/js/library.js';
-    script.async = true;
-    script.setAttribute('data-packeta-widget', '1');
-    script.onload = () => setPacketaReady(true);
-    script.onerror = () => setPacketaReady(false);
-    document.body.appendChild(script);
-  }, []);
+    const ensurePacketaScript = () => {
+      return new Promise<void>((resolve) => {
+        const existing = document.querySelector('script[data-packeta-widget="1"]') as HTMLScriptElement | null;
+        if (existing) {
+          if (window.Packeta?.Widget?.pick) {
+            if (active) {
+              setPacketaReady(true);
+            }
+            resolve();
+            return;
+          }
+
+          existing.addEventListener('load', () => {
+            if (active) {
+              setPacketaReady(true);
+            }
+            resolve();
+          }, { once: true });
+          existing.addEventListener('error', () => {
+            if (active) {
+              setPacketaReady(false);
+            }
+            resolve();
+          }, { once: true });
+          return;
+        }
+
+        const script = document.createElement('script');
+        script.src = 'https://widget.packeta.com/v6/www/js/library.js';
+        script.async = true;
+        script.setAttribute('data-packeta-widget', '1');
+        script.onload = () => {
+          if (active) {
+            setPacketaReady(true);
+          }
+          resolve();
+        };
+        script.onerror = () => {
+          if (active) {
+            setPacketaReady(false);
+          }
+          resolve();
+        };
+        document.body.appendChild(script);
+      });
+    };
+
+    const bootstrapPage = async () => {
+      setPageLoading(true);
+
+      const addressTask = user
+        ? api.getAddresses(user.id)
+            .then((data) => {
+              if (!active) {
+                return;
+              }
+              setAddresses(data);
+              const preferred = data.find((a: any) => a.isDefault) || data[0];
+              setSelectedAddr(preferred?.id ?? null);
+            })
+            .catch(() => {
+              if (!active) {
+                return;
+              }
+              setAddresses([]);
+              setSelectedAddr(null);
+            })
+        : Promise.resolve();
+
+      await Promise.all([ensurePacketaScript(), addressTask]);
+
+      if (active) {
+        setPageLoading(false);
+      }
+    };
+
+    bootstrapPage();
+
+    return () => {
+      active = false;
+    };
+  }, [user]);
 
   useEffect(() => {
     if (!hasItems) {
@@ -296,6 +358,10 @@ export default function CheckoutPage({ onSuccess }: { onSuccess?: (id: number) =
 
   if (!hasItems) {
     return null;
+  }
+
+  if (pageLoading) {
+    return <LoadingSpinner fullScreen={true} />;
   }
 
   return (

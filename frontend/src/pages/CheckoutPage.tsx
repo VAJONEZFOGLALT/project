@@ -70,6 +70,12 @@ export default function CheckoutPage({ onSuccess }: { onSuccess?: (id: number) =
   const [error, setError] = useState('');
   const [packetaSelecting, setPacketaSelecting] = useState(false);
 
+  const isDarkThemeActive = () => {
+    const attrTheme = document.documentElement.getAttribute('data-theme');
+    if (attrTheme) return attrTheme !== 'light';
+    return localStorage.getItem('theme') !== 'light';
+  };
+
   const selectedCourier = couriers.find((c) => c.id === courier) || couriers[0];
   const hasItems = items.length > 0;
   const needsPickup = selectedCourier.type === 'pickup';
@@ -118,8 +124,11 @@ export default function CheckoutPage({ onSuccess }: { onSuccess?: (id: number) =
   useEffect(() => {
     if (!packetaSelecting) {
       document.body.classList.remove('packeta-modal-open');
+      document.body.classList.remove('packeta-widget-dark');
       return;
     }
+
+    const darkTheme = isDarkThemeActive();
 
     const forcePacketaDialogLayout = () => {
       const iframe = document.querySelector('iframe[src*="widget.packeta.com"]') as HTMLIFrameElement | null;
@@ -148,8 +157,9 @@ export default function CheckoutPage({ onSuccess }: { onSuccess?: (id: number) =
       iframe.style.width = '100%';
       iframe.style.height = '100%';
       iframe.style.border = '0';
-      const isDarkTheme = document.documentElement.getAttribute('data-theme') !== 'light';
-      iframe.style.filter = isDarkTheme ? 'brightness(0.88) contrast(1.05)' : 'none';
+      iframe.style.filter = darkTheme
+        ? 'invert(0.9) hue-rotate(180deg) saturate(0.85) brightness(0.92)'
+        : 'none';
 
       const overlay = dialog.parentElement as HTMLElement | null;
       if (overlay && overlay !== document.body) {
@@ -163,6 +173,11 @@ export default function CheckoutPage({ onSuccess }: { onSuccess?: (id: number) =
     };
 
     document.body.classList.add('packeta-modal-open');
+    if (darkTheme) {
+      document.body.classList.add('packeta-widget-dark');
+    } else {
+      document.body.classList.remove('packeta-widget-dark');
+    }
     forcePacketaDialogLayout();
 
     const observer = new MutationObserver(() => {
@@ -174,6 +189,7 @@ export default function CheckoutPage({ onSuccess }: { onSuccess?: (id: number) =
 
     return () => {
       document.body.classList.remove('packeta-modal-open');
+      document.body.classList.remove('packeta-widget-dark');
       observer.disconnect();
       window.clearInterval(intervalId);
     };
@@ -182,7 +198,7 @@ export default function CheckoutPage({ onSuccess }: { onSuccess?: (id: number) =
   const handlePickPacketaPoint = () => {
     const apiKey = import.meta.env.VITE_PACKETA_API_KEY || '';
     const widgetLanguage = import.meta.env.VITE_PACKETA_API_LOCALE || 'en_GB';
-    const isDarkTheme = document.documentElement.getAttribute('data-theme') !== 'light';
+    const isDarkTheme = isDarkThemeActive();
 
     if (!apiKey) {
       setError('Hianyzik a VITE_PACKETA_API_KEY, add meg .env-ben.');
@@ -285,8 +301,10 @@ export default function CheckoutPage({ onSuccess }: { onSuccess?: (id: number) =
   return (
     <div className="checkout-wrapper">
       <div className={`checkout-container ${hasItems ? '' : 'checkout-container-empty'}`.trim()}>
-        <div className="checkout-main">
+        <div className="checkout-title-row">
           <h2>{t('checkout.title')}</h2>
+        </div>
+        <div className="checkout-main">
           {error && (
             <div className="error">
               <span>{error}</span>

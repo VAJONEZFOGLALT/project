@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 
@@ -32,6 +33,7 @@ function getCourierIcon(courier: CourierService): { icon: string; name: string }
 export default function OrderDetailPage() {
   const { t } = useTranslation();
   const { orderId } = useParams<{ orderId: string }>();
+  const { user } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
   const [order, setOrder] = useState<any>(null);
@@ -47,14 +49,25 @@ export default function OrderDetailPage() {
           return;
         }
 
-        const [allOrders, allProducts] = await Promise.all([
-          api.getOrders(),
+        const orderIdNum = Number(orderId);
+        if (!Number.isFinite(orderIdNum) || orderIdNum <= 0) {
+          showToast('Invalid order ID', 'error');
+          navigate('/shop/orders');
+          return;
+        }
+
+        const [foundOrder, allProducts] = await Promise.all([
+          api.getOrder(orderIdNum),
           api.getProducts(),
         ]);
 
-        const orderIdNum = Number(orderId);
-        const foundOrder = allOrders.find((o: any) => o.id === orderIdNum);
-        if (!foundOrder) {
+        if (!foundOrder || Number(foundOrder.id) !== orderIdNum) {
+          showToast('Order not found', 'error');
+          navigate('/shop/orders');
+          return;
+        }
+
+        if (user && Number(foundOrder.userId) !== user.id) {
           showToast('Order not found', 'error');
           navigate('/shop/orders');
           return;
@@ -72,7 +85,7 @@ export default function OrderDetailPage() {
     };
 
     loadOrderDetail();
-  }, [orderId, navigate, showToast]);
+  }, [orderId, navigate, showToast, user]);
 
   if (loading) return <LoadingSpinner />;
   if (!order) return null;

@@ -8,6 +8,7 @@ import { useWishlist } from '../hooks/useWishlist';
 import { useCompare } from '../hooks/useCompare';
 import { useToast } from '../contexts/ToastContext';
 import { ReviewsModal } from '../components/ReviewsModal';
+import CompareDrawer from '../components/CompareDrawer';
 import { ProductDetailSkeleton } from '../components/SkeletonLoader';
 import { getDetailImageUrl } from '../utils/imageOptimization';
 
@@ -22,7 +23,7 @@ export default function ProductDetailPage() {
   const { add } = useCart();
   const { user, isAuthenticated } = useAuth();
   const { wishlistIds, handleToggleWishlist, isWishlistPending, isWishlistLoading } = useWishlist();
-  const { compareIds, toggleCompare, isComparePending, isCompareLoading } = useCompare();
+  const { compareIds, compareItems, toggleCompare, clearCompare, isComparePending } = useCompare();
   const { showToast } = useToast();
   const [reviews, setReviews] = useState<any[]>([]);
   const [reviewSummary, setReviewSummary] = useState<{ average: number; count: number }>({ average: 0, count: 0 });
@@ -95,7 +96,7 @@ export default function ProductDetailPage() {
     }
   }
 
-  const pageLoading = loading || isWishlistLoading || isCompareLoading;
+  const pageLoading = loading || isWishlistLoading;
 
   if (pageLoading) return (
     <div className="view product-detail">
@@ -115,6 +116,7 @@ export default function ProductDetailPage() {
       return;
     }
     await toggleCompare(product);
+    window.dispatchEvent(new CustomEvent('open-compare-drawer'));
   };
 
   const handleReviewSubmitted = async () => {
@@ -304,6 +306,15 @@ export default function ProductDetailPage() {
         reviewSummary={reviewSummary}
         onReviewSubmitted={handleReviewSubmitted}
         initialView={reviewsModalView}
+      />
+
+      <CompareDrawer
+        items={compareItems}
+        onRemove={(productId) => {
+          const matched = compareItems.find((item) => item.id === productId);
+          toggleCompare(matched || { id: productId });
+        }}
+        onClear={clearCompare}
       />
 
     </div>

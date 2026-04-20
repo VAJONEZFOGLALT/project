@@ -3228,6 +3228,13 @@ tfoot tr { border-top: 2px solid var(--border); font-weight: 700; background: va
 .item-name { display: block; color: var(--text); font-weight: 600; font-size: 0.9em; margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .item-qty { display: block; color: var(--muted); font-size: 0.85em; }
 .item-price { color: var(--success); font-size: 0.85em; font-weight: 700; }
+.order-items-summary { padding: 14px; background: var(--surface-hover); border-radius: 10px; border: 1px solid var(--border); }
+.items-header { font-size: 0.85em; color: var(--muted); font-weight: 600; margin-bottom: 8px; }
+.items-inline { display: flex; flex-direction: column; gap: 6px; }
+.item-inline { display: flex; align-items: baseline; gap: 6px; font-size: 0.9em; }
+.item-badge { background: var(--primary-light); color: var(--primary); font-weight: 700; padding: 2px 6px; border-radius: 4px; font-size: 0.75em; }
+.item-name { margin: 0; }
+.item-sep { color: var(--border); }
 .orders-footer { display: flex; gap: 12px; margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); }
 .orders-footer > a { flex: 1; text-align: center; }
 

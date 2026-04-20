@@ -23,7 +23,7 @@ export default function ProductDetailPage() {
   const { add } = useCart();
   const { user, isAuthenticated } = useAuth();
   const { wishlistIds, handleToggleWishlist, isWishlistPending, isWishlistLoading } = useWishlist();
-  const { compareIds, compareItems, toggleCompare, clearCompare, isComparePending } = useCompare();
+  const { compareIds, compareItems, toggleCompare, clearCompare } = useCompare();
   const { showToast } = useToast();
   const [reviews, setReviews] = useState<any[]>([]);
   const [reviewSummary, setReviewSummary] = useState<{ average: number; count: number }>({ average: 0, count: 0 });

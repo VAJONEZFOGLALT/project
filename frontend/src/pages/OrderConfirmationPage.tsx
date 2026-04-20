@@ -30,7 +30,7 @@ type ConfirmedOrder = {
 export default function OrderConfirmationPage({ orderId, onOrderViewed }: { orderId?: number; onOrderViewed?: () => void }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [resolvedOrderId, setResolvedOrderId] = useState<number | undefined>(() => {
+  const [resolvedOrderId] = useState<number | undefined>(() => {
     if (orderId) {
       return orderId;
     }

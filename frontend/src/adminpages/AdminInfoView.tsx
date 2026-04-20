@@ -20,7 +20,7 @@ type OrderSummary = {
 };
 
 type AdminInfoViewProps = {
-  onNavigateToTab: (tab: 'users' | 'orders') => void;
+  onNavigateToTab: (tab: 'users' | 'orders' | 'products') => void;
 };
 
 const getErrorMessage = (error: unknown) => {

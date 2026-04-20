@@ -148,7 +148,7 @@ export default function ProductsView() {
     return (
       <div className="file-picker">
         <input
-          ref={el => (inputRef.current = el)}
+          ref={el => { inputRef.current = el; }}
           type="file"
           accept={accept}
           style={{ display: 'none' }}

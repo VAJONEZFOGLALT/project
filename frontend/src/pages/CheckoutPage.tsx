@@ -71,6 +71,7 @@ export default function CheckoutPage({ onSuccess }: { onSuccess?: (id: number) =
   const [error, setError] = useState('');
   const [packetaSelecting, setPacketaSelecting] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
+  const [orderSubmitting, setOrderSubmitting] = useState(false);
 
   const isDarkThemeActive = () => {
     const attrTheme = document.documentElement.getAttribute('data-theme');
@@ -176,12 +177,12 @@ export default function CheckoutPage({ onSuccess }: { onSuccess?: (id: number) =
   }, [user]);
 
   useEffect(() => {
-    if (!hasItems) {
+    if (!hasItems && !orderSubmitting) {
       navigate('/shop/all', { replace: true });
       return;
     }
     setError('');
-  }, [hasItems, navigate]);
+  }, [hasItems, navigate, orderSubmitting]);
 
   useEffect(() => {
     if (!packetaSelecting) {
@@ -304,6 +305,7 @@ export default function CheckoutPage({ onSuccess }: { onSuccess?: (id: number) =
   const finalTotal = total + ship;
 
   const handleOrder = async () => {
+    setOrderSubmitting(true);
     setLoading(true);
     setError('');
     try {
@@ -358,6 +360,7 @@ export default function CheckoutPage({ onSuccess }: { onSuccess?: (id: number) =
       setError(e.message);
     } finally {
       setLoading(false);
+      setOrderSubmitting(false);
     }
   };
 

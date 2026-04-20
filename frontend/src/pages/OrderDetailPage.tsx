@@ -52,7 +52,8 @@ export default function OrderDetailPage() {
           api.getProducts(),
         ]);
 
-        const foundOrder = allOrders.find((o: any) => o.id === orderId);
+        const orderIdNum = Number(orderId);
+        const foundOrder = allOrders.find((o: any) => o.id === orderIdNum);
         if (!foundOrder) {
           showToast('Order not found', 'error');
           navigate('/shop/orders');

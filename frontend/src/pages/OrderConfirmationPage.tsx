@@ -30,7 +30,7 @@ type ConfirmedOrder = {
 export default function OrderConfirmationPage({ orderId, onOrderViewed }: { orderId?: number; onOrderViewed?: () => void }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [resolvedOrderId] = useState<number | undefined>(() => {
+  const [resolvedOrderId, setResolvedOrderId] = useState<number | undefined>(() => {
     if (orderId) {
       return orderId;
     }
@@ -39,6 +39,12 @@ export default function OrderConfirmationPage({ orderId, onOrderViewed }: { orde
     const parsed = Number(stored);
     return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
   });
+  
+  useEffect(() => {
+    if (orderId && orderId !== resolvedOrderId) {
+      setResolvedOrderId(orderId);
+    }
+  }, [orderId, resolvedOrderId]);
   const [order, setOrder] = useState<ConfirmedOrder | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');

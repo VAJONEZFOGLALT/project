@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 import { useToast } from '../contexts/ToastContext';
 import { LoadingSpinner } from '../components/LoadingSpinner';

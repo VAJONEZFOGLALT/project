@@ -23,7 +23,7 @@ export default function ProductDetailPage() {
   const { add } = useCart();
   const { user, isAuthenticated } = useAuth();
   const { wishlistIds, handleToggleWishlist, isWishlistPending, isWishlistLoading } = useWishlist();
-  const { compareIds, compareItems, toggleCompare, clearCompare } = useCompare();
+  const { compareItems, toggleCompare, clearCompare } = useCompare();
   const { showToast } = useToast();
   const [reviews, setReviews] = useState<any[]>([]);
   const [reviewSummary, setReviewSummary] = useState<{ average: number; count: number }>({ average: 0, count: 0 });
@@ -174,11 +174,11 @@ export default function ProductDetailPage() {
               </button>
               <button 
                 type="button" 
-                  className={`compare-action ${compareIds.includes(product.id) ? 'active' : ''}`.trim()} 
+                  className="compare-action" 
                 onClick={handleToggleCompare}
-                title={!isAuthenticated ? t('products.logInToCompare') : compareIds.includes(product.id) ? t('products.removeFromCompare') : t('products.addToCompare')}
+                title={!isAuthenticated ? t('products.logInToCompare') : t('products.addToCompare')}
               >
-                {compareIds.includes(product.id) ? t('products.compared') : t('products.compare')}
+                {t('products.compare')}
               </button>
             </div>
           </div>

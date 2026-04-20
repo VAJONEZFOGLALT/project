@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useCart } from '../contexts/CartContext';
@@ -72,6 +72,7 @@ export default function CheckoutPage({ onSuccess }: { onSuccess?: (id: number) =
   const [packetaSelecting, setPacketaSelecting] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
   const [orderSubmitting, setOrderSubmitting] = useState(false);
+  const orderCompletedRef = useRef(false);
 
   const isDarkThemeActive = () => {
     const attrTheme = document.documentElement.getAttribute('data-theme');
@@ -177,7 +178,7 @@ export default function CheckoutPage({ onSuccess }: { onSuccess?: (id: number) =
   }, [user]);
 
   useEffect(() => {
-    if (!hasItems && !orderSubmitting) {
+    if (!hasItems && !orderSubmitting && !orderCompletedRef.current) {
       navigate('/shop/all', { replace: true });
       return;
     }
@@ -305,6 +306,7 @@ export default function CheckoutPage({ onSuccess }: { onSuccess?: (id: number) =
   const finalTotal = total + ship;
 
   const handleOrder = async () => {
+    orderCompletedRef.current = false;
     setOrderSubmitting(true);
     setLoading(true);
     setError('');
@@ -353,6 +355,7 @@ export default function CheckoutPage({ onSuccess }: { onSuccess?: (id: number) =
         const reason = order.emailStatus.reason || 'Unknown email delivery issue';
         showToast(t('checkout.errors.emailDeliveryFailed', { reason }), 'warning');
       }
+      orderCompletedRef.current = true;
       clear();
       onSuccess?.(order.id);
       navigate('/shop/confirmation', { state: { orderId: order.id } });

@@ -106,7 +106,7 @@ export default function OrderDetailPage() {
       </div>
 
       <div className="order-detail-container">
-        <!-- Order Summary -->
+        {/* Order Summary */}
         <section className="detail-section">
           <h2>{t('orders.orderSummary') || 'Order Summary'}</h2>
           <div className="detail-grid">
@@ -141,7 +141,7 @@ export default function OrderDetailPage() {
           </div>
         </section>
 
-        <!-- Order Items -->
+        {/* Order Items */}
         {items.length > 0 && (
           <section className="detail-section">
             <h2>{t('orders.orderItems') || 'Order Items'}</h2>
@@ -170,7 +170,7 @@ export default function OrderDetailPage() {
           </section>
         )}
 
-        <!-- Shipping Address -->
+        {/* Shipping Address */}
         {order.shippingAddress && (
           <section className="detail-section">
             <h2>{t('orders.shippingTo') || 'Shipping To'}</h2>

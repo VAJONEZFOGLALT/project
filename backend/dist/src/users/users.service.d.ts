@@ -7,46 +7,47 @@ export declare class UsersService {
     create(createUserDto: CreateUserDto): Promise<{
         username: string;
         email: string;
-        password_hash: string;
         name: string;
-        avatar: string | null;
         role: string;
+        avatar: string | null;
+        password_hash: string;
         id: number;
     }>;
     findAll(): import("@prisma/client").Prisma.PrismaPromise<{
         username: string;
         email: string;
-        password_hash: string;
         name: string;
-        avatar: string | null;
         role: string;
+        avatar: string | null;
+        password_hash: string;
         id: number;
     }[]>;
     findOne(id: number): import("@prisma/client").Prisma.Prisma__UsersClient<{
         username: string;
         email: string;
-        password_hash: string;
         name: string;
-        avatar: string | null;
         role: string;
+        avatar: string | null;
+        password_hash: string;
         id: number;
     } | null, null, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    private validatePasswordStrength;
     update(id: number, updateUserDto: UpdateUserDto): Promise<{
         username: string;
         email: string;
-        password_hash: string;
         name: string;
-        avatar: string | null;
         role: string;
+        avatar: string | null;
+        password_hash: string;
         id: number;
     }>;
     remove(id: number): Promise<{
         username: string;
         email: string;
-        password_hash: string;
         name: string;
-        avatar: string | null;
         role: string;
+        avatar: string | null;
+        password_hash: string;
         id: number;
     }>;
 }

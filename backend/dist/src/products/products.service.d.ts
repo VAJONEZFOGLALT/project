@@ -8,15 +8,29 @@ export declare class ProductsService {
     private readonly listCache;
     private readonly itemCache;
     private readonly cacheTtlMs;
+    private readonly categoryTranslationOverrides;
+    private readonly productNameTranslationContext;
+    private readonly productDescriptionTranslationContext;
+    private readonly categoryTranslationContext;
     constructor(prisma: PrismaService, translateService: LibreTranslateService);
     private normalizeLanguage;
     private getFromCache;
     private setCache;
     private clearProductCaches;
+    private resolveCategoryLabel;
     findAll(language?: string): Promise<any[]>;
+    getFeaturedShowcase(language?: string): Promise<{
+        categories: {
+            key: string;
+            label: string;
+            viewsCount: number;
+            productCount: number;
+        }[];
+        products: any[];
+    }>;
     create(createProductDto: CreateProductDto): Promise<{
-        id: number;
         name: string;
+        id: number;
         description: string | null;
         category: string;
         price: number;
@@ -26,8 +40,8 @@ export declare class ProductsService {
     }>;
     findOne(id: number, language?: string): Promise<any>;
     update(id: number, updateProductDto: UpdateProductDto): Promise<{
-        id: number;
         name: string;
+        id: number;
         description: string | null;
         category: string;
         price: number;
@@ -36,8 +50,8 @@ export declare class ProductsService {
         deletedAt: Date | null;
     }>;
     remove(id: number): Promise<{
-        id: number;
         name: string;
+        id: number;
         description: string | null;
         category: string;
         price: number;

@@ -35,7 +35,8 @@ async function bootstrap() {
         .addTag('addresses', 'Shipping addresses')
         .build();
     const document = swagger_1.SwaggerModule.createDocument(app, config);
-    swagger_1.SwaggerModule.setup('api/docs', app, document, {
+    swagger_1.SwaggerModule.setup('docs', app, document, {
+        useGlobalPrefix: true,
         swaggerOptions: {
             persistAuthorization: true,
         },

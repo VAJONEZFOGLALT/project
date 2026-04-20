@@ -147,10 +147,40 @@ export class OrdersService {
     });
   }
 
-  update(id: number, updateOrderDto: UpdateOrderDto) {
+  async update(id: number, updateOrderDto: UpdateOrderDto) {
     const { items, ...rest } = updateOrderDto;
-    // Simple update excludes altering items; extend as needed for item updates
-    return this.prisma.orders.update({ where: { id }, data: rest, include: { orderItems: true } });
+    // Read existing order status & user info
+    const existing = await this.prisma.orders.findUnique({ where: { id }, include: { orderItems: true } });
+
+    const prevStatus = (existing?.status || '').toString().toUpperCase();
+
+    const updated = await this.prisma.orders.update({ where: { id }, data: rest, include: { orderItems: true } });
+
+    const newStatus = (updated?.status || '').toString().toUpperCase();
+
+    // If status changed to DELIVERED, send delivery email
+    if (prevStatus !== 'DELIVERED' && newStatus === 'DELIVERED') {
+      try {
+        const user = await this.prisma.users.findUnique({ where: { id: updated.userId }, select: { email: true, name: true } });
+        if (user?.email) {
+          const itemsForEmail = (updated.orderItems || []).map((it: any) => ({ name: it.name || `#${it.productId}`, quantity: it.quantity, price: it.price }));
+          await this.notificationsService.sendDeliveryEmail({
+            orderId: updated.id,
+            recipientEmail: user.email,
+            recipientName: user.name,
+            courier: updated.courier,
+            trackingNumber: updated.trackingNumber || undefined,
+            shippingAddress: updated.shippingAddress || undefined,
+            items: itemsForEmail,
+            deliveredAt: new Date(),
+          });
+        }
+      } catch (err) {
+        console.warn(`Failed to send delivery email for order #${id}:`, err);
+      }
+    }
+
+    return updated;
   }
 
   async remove(id: number) {

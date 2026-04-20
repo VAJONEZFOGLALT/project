@@ -28,6 +28,9 @@ let OrdersController = class OrdersController {
     findAll() {
         return this.ordersService.findAll();
     }
+    findByUser(userId) {
+        return this.ordersService.findByUser(+userId);
+    }
     findOne(id) {
         return this.ordersService.findOne(+id);
     }
@@ -58,6 +61,13 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], OrdersController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('user/:userId'),
+    __param(0, (0, common_1.Param)('userId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], OrdersController.prototype, "findByUser", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),

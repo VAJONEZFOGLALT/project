@@ -6,17 +6,17 @@ export declare class ReviewsService {
     constructor(prisma: PrismaService);
     findAll(): import("@prisma/client").Prisma.PrismaPromise<({
         user: {
-            id: number;
             username: string;
             email: string;
-            password_hash: string;
             name: string;
-            avatar: string | null;
             role: string;
+            avatar: string | null;
+            password_hash: string;
+            id: number;
         };
         product: {
-            id: number;
             name: string;
+            id: number;
             description: string | null;
             category: string;
             price: number;
@@ -27,30 +27,30 @@ export declare class ReviewsService {
     } & {
         id: number;
         userId: number;
+        createdAt: Date;
         productId: number;
         rating: number;
         title: string;
         comment: string;
-        createdAt: Date;
     })[]>;
     findByProduct(productId: number): import("@prisma/client").Prisma.PrismaPromise<({
         user: {
-            id: number;
             username: string;
             email: string;
-            password_hash: string;
             name: string;
-            avatar: string | null;
             role: string;
+            avatar: string | null;
+            password_hash: string;
+            id: number;
         };
     } & {
         id: number;
         userId: number;
+        createdAt: Date;
         productId: number;
         rating: number;
         title: string;
         comment: string;
-        createdAt: Date;
     })[]>;
     getAverage(productId: number): Promise<{
         average: number;
@@ -59,28 +59,28 @@ export declare class ReviewsService {
     create(data: CreateReviewDto): import("@prisma/client").Prisma.Prisma__ReviewsClient<{
         id: number;
         userId: number;
+        createdAt: Date;
         productId: number;
         rating: number;
         title: string;
         comment: string;
-        createdAt: Date;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
     update(id: number, data: UpdateReviewDto): import("@prisma/client").Prisma.Prisma__ReviewsClient<{
         id: number;
         userId: number;
+        createdAt: Date;
         productId: number;
         rating: number;
         title: string;
         comment: string;
-        createdAt: Date;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
     remove(id: number): import("@prisma/client").Prisma.Prisma__ReviewsClient<{
         id: number;
         userId: number;
+        createdAt: Date;
         productId: number;
         rating: number;
         title: string;
         comment: string;
-        createdAt: Date;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
 }

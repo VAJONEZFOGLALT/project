@@ -32,6 +32,9 @@ let ProductsController = class ProductsController {
     findAll(lang) {
         return this.productsService.findAll(lang);
     }
+    getFeatured(lang) {
+        return this.productsService.getFeaturedShowcase(lang);
+    }
     findOne(id, lang) {
         return this.productsService.findOne(+id, lang);
     }
@@ -64,6 +67,16 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], ProductsController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('featured'),
+    (0, common_1.Header)('Cache-Control', 'no-cache, no-store, must-revalidate'),
+    (0, common_1.Header)('Pragma', 'no-cache'),
+    (0, common_1.Header)('Expires', '0'),
+    __param(0, (0, common_1.Query)('lang')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], ProductsController.prototype, "getFeatured", null);
 __decorate([
     (0, common_1.Get)(':id'),
     (0, common_1.Header)('Cache-Control', 'no-cache, no-store, must-revalidate'),

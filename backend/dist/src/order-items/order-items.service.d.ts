@@ -8,35 +8,35 @@ export declare class OrderItemsService {
         id: number;
         price: number;
         productId: number;
-        orderId: number;
         quantity: number;
+        orderId: number;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
     findAll(): import("@prisma/client").Prisma.PrismaPromise<{
         id: number;
         price: number;
         productId: number;
-        orderId: number;
         quantity: number;
+        orderId: number;
     }[]>;
     findOne(id: number): import("@prisma/client").Prisma.Prisma__OrderItemsClient<{
         id: number;
         price: number;
         productId: number;
-        orderId: number;
         quantity: number;
+        orderId: number;
     } | null, null, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
     update(id: number, updateOrderItemDto: UpdateOrderItemDto): import("@prisma/client").Prisma.Prisma__OrderItemsClient<{
         id: number;
         price: number;
         productId: number;
-        orderId: number;
         quantity: number;
+        orderId: number;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
     remove(id: number): import("@prisma/client").Prisma.Prisma__OrderItemsClient<{
         id: number;
         price: number;
         productId: number;
-        orderId: number;
         quantity: number;
+        orderId: number;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
 }

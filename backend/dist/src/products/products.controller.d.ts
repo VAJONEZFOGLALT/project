@@ -7,8 +7,8 @@ export declare class ProductsController {
     private readonly cloudinaryService;
     constructor(productsService: ProductsService, cloudinaryService: CloudinaryService);
     create(createProductDto: CreateProductDto): Promise<{
-        id: number;
         name: string;
+        id: number;
         description: string | null;
         category: string;
         price: number;
@@ -17,10 +17,19 @@ export declare class ProductsController {
         deletedAt: Date | null;
     }>;
     findAll(lang?: string): Promise<any[]>;
+    getFeatured(lang?: string): Promise<{
+        categories: {
+            key: string;
+            label: string;
+            viewsCount: number;
+            productCount: number;
+        }[];
+        products: any[];
+    }>;
     findOne(id: string, lang?: string): Promise<any>;
     update(id: string, updateProductDto: UpdateProductDto): Promise<{
-        id: number;
         name: string;
+        id: number;
         description: string | null;
         category: string;
         price: number;
@@ -29,8 +38,8 @@ export declare class ProductsController {
         deletedAt: Date | null;
     }>;
     uploadImage(id: string, file: Express.Multer.File): Promise<{
-        id: number;
         name: string;
+        id: number;
         description: string | null;
         category: string;
         price: number;
@@ -39,8 +48,8 @@ export declare class ProductsController {
         deletedAt: Date | null;
     }>;
     remove(id: string): Promise<{
-        id: number;
         name: string;
+        id: number;
         description: string | null;
         category: string;
         price: number;

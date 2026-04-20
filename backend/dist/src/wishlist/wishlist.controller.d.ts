@@ -4,8 +4,8 @@ export declare class WishlistController {
     constructor(wishlistService: WishlistService);
     findByUser(userId: string): import("@prisma/client").Prisma.PrismaPromise<({
         product: {
-            id: number;
             name: string;
+            id: number;
             description: string | null;
             category: string;
             price: number;
@@ -16,8 +16,8 @@ export declare class WishlistController {
     } & {
         id: number;
         userId: number;
-        productId: number;
         createdAt: Date;
+        productId: number;
     })[]>;
     add(body: {
         userId: number;
@@ -25,20 +25,20 @@ export declare class WishlistController {
     }): Promise<{
         id: number;
         userId: number;
-        productId: number;
         createdAt: Date;
+        productId: number;
     }>;
     remove(id: string): import("@prisma/client").Prisma.Prisma__WishlistClient<{
         id: number;
         userId: number;
-        productId: number;
         createdAt: Date;
+        productId: number;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
     removeByUserProduct(userId: string, productId: string): Promise<{
         id: number;
         userId: number;
-        productId: number;
         createdAt: Date;
+        productId: number;
     } | null>;
     isInWishlist(userId: string, productId: string): Promise<boolean>;
 }

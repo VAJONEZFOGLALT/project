@@ -33,7 +33,6 @@ function getCourierIcon(courier: CourierService): { icon: string; name: string }
 export default function OrderDetailPage() {
   const { t } = useTranslation();
   const { orderId } = useParams<{ orderId: string }>();
-  const { user } = useAuth();
   const { showToast } = useToast();
   const navigate = useNavigate();
   const [order, setOrder] = useState<any>(null);

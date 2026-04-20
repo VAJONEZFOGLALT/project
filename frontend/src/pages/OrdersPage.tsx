@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
@@ -32,6 +32,7 @@ function getCourierIcon(courier: CourierService): { icon: string; name: string }
 
 export default function OrdersPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { showToast } = useToast();
   const [orders, setOrders] = useState<any[]>([]);
@@ -110,7 +111,6 @@ export default function OrdersPage() {
           {orders.map((order) => {
             const items = Array.isArray(order.orderItems) ? order.orderItems : [];
             const itemCount = items.reduce((sum: number, item: any) => sum + Number(item.quantity || 0), 0);
-            const uniqueProducts = items.length;
             const hasCourier = Boolean(order.courier);
             const hasTracking = Boolean(order.trackingNumber);
             const hasShippingAddress = Boolean(order.shippingAddress);
@@ -120,7 +120,7 @@ export default function OrdersPage() {
               day: 'numeric',
             });
             return (
-              <div key={order.id} className="order-card">
+              <div key={order.id} className="order-card" onClick={() => navigate(`/shop/orders/${order.id}`)} style={{cursor: 'pointer'}}>
                 <div className="order-header">
                   <div className="order-id">
                     <span className="order-number">#{order.id}</span>

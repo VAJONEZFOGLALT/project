@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { api } from '../services/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
@@ -30,9 +30,15 @@ type ConfirmedOrder = {
 export default function OrderConfirmationPage({ orderId, onOrderViewed }: { orderId?: number; onOrderViewed?: () => void }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
+  const locationOrderId = Number((location.state as { orderId?: number } | null)?.orderId);
   const [resolvedOrderId, setResolvedOrderId] = useState<number | undefined>(() => {
     if (orderId) {
       return orderId;
+    }
+
+    if (Number.isFinite(locationOrderId) && locationOrderId > 0) {
+      return locationOrderId;
     }
 
     const stored = localStorage.getItem('lastConfirmedOrderId');
@@ -43,8 +49,13 @@ export default function OrderConfirmationPage({ orderId, onOrderViewed }: { orde
   useEffect(() => {
     if (orderId && orderId !== resolvedOrderId) {
       setResolvedOrderId(orderId);
+      return;
     }
-  }, [orderId, resolvedOrderId]);
+
+    if (!orderId && Number.isFinite(locationOrderId) && locationOrderId > 0 && locationOrderId !== resolvedOrderId) {
+      setResolvedOrderId(locationOrderId);
+    }
+  }, [orderId, locationOrderId, resolvedOrderId]);
   const [order, setOrder] = useState<ConfirmedOrder | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');

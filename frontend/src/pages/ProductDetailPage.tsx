@@ -30,6 +30,7 @@ export default function ProductDetailPage() {
   const [isReviewsModalOpen, setIsReviewsModalOpen] = useState(false);
   const [reviewsModalView, setReviewsModalView] = useState<'list' | 'write'>('list');
   const [addedToCart, setAddedToCart] = useState(false);
+  const [compareDrawerOpen, setCompareDrawerOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -116,7 +117,7 @@ export default function ProductDetailPage() {
       return;
     }
     await toggleCompare(product);
-    window.dispatchEvent(new CustomEvent('open-compare-drawer'));
+    setCompareDrawerOpen(true);
   };
 
   const handleReviewSubmitted = async () => {
@@ -173,10 +174,9 @@ export default function ProductDetailPage() {
               </button>
               <button 
                 type="button" 
-                  className={`compare-action ${compareIds.includes(product.id) ? 'active' : ''} ${isComparePending(product.id) ? 'is-loading' : ''}`.trim()} 
+                  className={`compare-action ${compareIds.includes(product.id) ? 'active' : ''}`.trim()} 
                 onClick={handleToggleCompare}
                 title={!isAuthenticated ? t('products.logInToCompare') : compareIds.includes(product.id) ? t('products.removeFromCompare') : t('products.addToCompare')}
-                  disabled={isComparePending(product.id)}
               >
                 {compareIds.includes(product.id) ? t('products.compared') : t('products.compare')}
               </button>
@@ -315,6 +315,8 @@ export default function ProductDetailPage() {
           toggleCompare(matched || { id: productId });
         }}
         onClear={clearCompare}
+        isOpen={compareDrawerOpen}
+        onOpenChange={setCompareDrawerOpen}
       />
 
     </div>

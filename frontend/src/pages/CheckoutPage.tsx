@@ -355,7 +355,7 @@ export default function CheckoutPage({ onSuccess }: { onSuccess?: (id: number) =
       }
       clear();
       onSuccess?.(order.id);
-      navigate('/shop/confirmation');
+      navigate('/shop/confirmation', { state: { orderId: order.id } });
     } catch (e: any) {
       setError(e.message);
     } finally {
